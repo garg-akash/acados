@@ -80,6 +80,7 @@ ocp_model.set('T', dt*ocp_N);
 % symbolics
 ocp_model.set('sym_x', model.sym_x);
 ocp_model.set('sym_u', model.sym_u);
+ocp_model.set('sym_p', model.sym_p);
 % ocp_model.set('sym_xdot', model.sym_xdot);
 % cost
 ocp_model.set('cost_type', ocp_cost_type);
@@ -132,6 +133,7 @@ sim_model = acados_sim_model();
 % symbolics
 sim_model.set('sym_x', model.sym_x);
 sim_model.set('sym_u', model.sym_u);
+sim_model.set('sym_p', model.sym_p);
 % sim_model.set('sym_xdot', model.sym_xdot);
 % model
 % sim_model.set('T', T/ocp_N);
@@ -181,6 +183,11 @@ for ii=1:n_sim
 	ocp.set('init_x', x_traj_init);
 	ocp.set('init_u', u_traj_init);
     
+    % set parameter
+    for k=0:ocp_N-1
+        ocp.set('p', [M_inv(:); C_(:); N_(:)], k);
+    end
+    
     for k = 0:ocp_N-1 %new - set the reference to track
         yref = ref(zyx2R(x_sim(4:6,ii)), p_ref, pd_ref, ocp_N, k+ii, o_ref, w_ref);
         yref = [yref;zeros(16,1)];
@@ -205,6 +212,8 @@ for ii=1:n_sim
 	sim.set('x', x_sim(:,ii));
 	% set input in sim
 	sim.set('u', u_sim(:,ii));
+    % set parameter
+    sim.set('p', [M_inv(:); C_(:); N_(:)]);
 
 	% simulate state
 	sim.solve();
@@ -239,145 +248,3 @@ function y = ref(R,p,pd,k,instant,ang,wd)
         y = [y; [p(size(p,1),:)'; ang(size(p,1),:)']; [R'*pd(size(p,1),:)'; R'*wd(:,size(p,1))];9.8;0.3*ones(16,1)];
     end
 end
-
-%%
-
-% nx = model.nx;
-% nu = model.nu;
-% % ny = model.ny;
-% 
-% sim = setup_integrator(model);
-% estimator = setup_estimator(model);
-% 
-% %% Simulation
-% 
-% N_sim = 120;
-% 
-% % iter_step = 50; 
-% step = 3;
-% 
-% x0 = [-1 3 4 25];
-% x0_bar = [-1 3 4 25];
-% 
-% v_std = 0.0;   % standard deviation of measurement noise
-% 
-% x_sim = zeros(nx, N_sim+1);
-% y_sim = zeros(ny, N_sim);
-% 
-% x_sim(:,1) = x0;
-% 
-% for n=1:N_sim
-% 	
-% 	% set initial state
-% 	sim.set('x', x_sim(:,n));
-% 
-% 	% solve
-% 	sim.solve();        
-% 
-% 	% get simulated state
-% 	x_sim(:,n+1) = sim.get('xn');
-%     
-% %     % unmodeled step change in x(4)
-% %     if n == iter_step
-% %         x_sim(end, n+1) = x_sim(end, n+1) + step;
-% %     end
-%     
-%     % measurement
-%     y_sim(:, n) = x_sim(1, n) + v_std*randn(1, 1);
-% end
-% 
-% %% Estimation
-% 
-% x_est = zeros(nx, N_sim-model.N);
-% 
-% yref_0 = zeros(ny + nu + nx, 1);
-% yref = zeros(ny + nu, 1);
-% 
-% for n=1:N_sim-model.N
-%    
-%     % set measurements
-%     yref_0(1:ny) = y_sim(:, n);
-%     yref_0(ny+nu+1:end) = x0_bar;
-%     
-%     estimator.set('cost_y_ref', yref_0, 0);
-%     
-%     for i=1:model.N-1
-%         yref(1:ny) = y_sim(:, n+i);
-%         estimator.set('cost_y_ref', yref, i);
-%     end
-%     
-%     %estimator.set('init_x', x_sim(:, n:n+model.N))
-%     
-%     % solve 
-%     estimator.solve()
-% 
-%     x_est(:, n) = estimator.get('x', model.N);
-%     
-%     % update arrival cost (TODO: update P0 as well)
-%     x0_bar = estimator.get('x', 1);
-% end
-% 
-% %% Plot
-% ts = model.h*(0:N_sim);
-% 
-% figure; 
-% States = {'x_1', 'x_2', 'x_3', 'p'};
-% for i=1:length(States)
-%     subplot(length(States), 1, i); hold on;
-%     plot(ts, x_sim(i,:)); 
-%     plot(ts(model.N+1:end-1), x_est(i,:)); 
-%     
-%     if i == 1
-%         plot(ts(1:end-1), y_sim, 'x');
-%         legend('true', 'est', 'measured');
-%     end
-%     grid on;
-%     ylabel(States{i});
-%     xlabel('t [s]');
-% end
-% 
-% figure; 
-% States = {'abs. error x_1', 'abs. error x_2', 'abs. error x_3', 'abs. error p'};
-% for i=1:length(States)
-%     subplot(length(States), 1, i); hold on; grid on;
-%     
-%     plot(ts(model.N+1:end-1), abs(x_est(i,:) - x_sim(i, model.N+1:end-1))); 
-%    
-%     ylabel(States{i});
-%     xlabel('t [s]');
-% end
-% 
-% %% test templated solver
-% disp('testing templated solver');
-% estimator.generate_c_code;
-% cd c_generated_code/
-% command = strcat('t_ocp = ', estimator.model_struct.name , '_mex_solver');
-% eval(command);
-% 
-% % set measurements
-% yref_0(1:ny) = y_sim(:, 1);
-% yref_0(ny+nu+1:end) = x0;
-% 
-% estimator.set('cost_y_ref', yref_0, 0);
-% t_ocp.set('cost_y_ref', yref_0, 0);
-% 
-% for i=1:model.N-1
-%     yref(1:ny) = y_sim(:, i+1);
-%     estimator.set('cost_y_ref', yref, i);
-%     t_ocp.set('cost_y_ref', yref, i);
-% end
-% 
-% t_ocp.solve()
-% xt_traj = t_ocp.get('x');
-% 
-% estimator.solve()
-% x_traj = estimator.get('x');
-% 
-% max_diff = max(max(abs(xt_traj - x_traj)));
-% disp(['difference ' num2str(max_diff)]);
-% 
-% t_ocp.print('stat')
-% cost_val_t_ocp = t_ocp.get_cost();
-% clear t_ocp
-% cd ..
-
