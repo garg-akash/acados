@@ -44,7 +44,7 @@ ocp_cost_type = 'linear_ls';
 
 %% setup problem
 % object mpc 
-model = object_model(dyn, o.G, Fc_hat);
+model = object_model(o.G, Fc_hat);
 % dims
 % T = 2.5; % horizon length time %already defined in load_init_params
 % h = 0.01;

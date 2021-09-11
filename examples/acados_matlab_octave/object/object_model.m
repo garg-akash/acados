@@ -1,4 +1,4 @@
-function [model] = object_model(dyn, G, Fc_hat)
+function [model] = object_model(G, Fc_hat)
 
 import casadi.*
 
