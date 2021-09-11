@@ -89,7 +89,7 @@ int ocp_model_acados_sim_create(sim_solver_capsule * capsule)
     capsule->sim_forw_vde_casadi->casadi_sparsity_in = &ocp_model_expl_vde_forw_sparsity_in;
     capsule->sim_forw_vde_casadi->casadi_sparsity_out = &ocp_model_expl_vde_forw_sparsity_out;
     capsule->sim_forw_vde_casadi->casadi_work = &ocp_model_expl_vde_forw_work;
-    external_function_param_casadi_create(capsule->sim_forw_vde_casadi, 0);
+    external_function_param_casadi_create(capsule->sim_forw_vde_casadi, 78);
 
     capsule->sim_expl_ode_fun_casadi->casadi_fun = &ocp_model_expl_ode_fun;
     capsule->sim_expl_ode_fun_casadi->casadi_n_in = &ocp_model_expl_ode_fun_n_in;
@@ -97,7 +97,7 @@ int ocp_model_acados_sim_create(sim_solver_capsule * capsule)
     capsule->sim_expl_ode_fun_casadi->casadi_sparsity_in = &ocp_model_expl_ode_fun_sparsity_in;
     capsule->sim_expl_ode_fun_casadi->casadi_sparsity_out = &ocp_model_expl_ode_fun_sparsity_out;
     capsule->sim_expl_ode_fun_casadi->casadi_work = &ocp_model_expl_ode_fun_work;
-    external_function_param_casadi_create(capsule->sim_expl_ode_fun_casadi, 0);
+    external_function_param_casadi_create(capsule->sim_expl_ode_fun_casadi, 78);
 
     
 
@@ -152,6 +152,13 @@ int ocp_model_acados_sim_create(sim_solver_capsule * capsule)
                                                ocp_model_sim_dims, ocp_model_sim_opts);
     capsule->acados_sim_solver = ocp_model_sim_solver;
 
+
+    /* initialize parameter values */
+    double* p = calloc(78, sizeof(double));
+    
+
+    ocp_model_acados_sim_update_params(capsule, p, 78);
+    free(p);
 
 
     /* initialize input */
@@ -222,7 +229,7 @@ int ocp_model_acados_sim_free(sim_solver_capsule *capsule)
 int ocp_model_acados_sim_update_params(sim_solver_capsule *capsule, double *p, int np)
 {
     int status = 0;
-    int casadi_np = 0;
+    int casadi_np = 78;
 
     if (casadi_np != np) {
         printf("ocp_model_acados_sim_update_params: trying to set %i parameters for external functions."

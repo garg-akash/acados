@@ -52,7 +52,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     int status = 0;
 
     // create solver
-    nlp_solver_capsule *acados_ocp_capsule = ocp_model_acados_create_capsule();
+    ocp_model_solver_capsule *acados_ocp_capsule = ocp_model_acados_create_capsule();
 
     status = ocp_model_acados_create(acados_ocp_capsule);
 

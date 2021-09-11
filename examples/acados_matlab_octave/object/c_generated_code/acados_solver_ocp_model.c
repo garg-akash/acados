@@ -82,23 +82,23 @@
 
 // ** solver data **
 
-nlp_solver_capsule * ocp_model_acados_create_capsule()
+ocp_model_solver_capsule * ocp_model_acados_create_capsule(void)
 {
-    void* capsule_mem = malloc(sizeof(nlp_solver_capsule));
-    nlp_solver_capsule *capsule = (nlp_solver_capsule *) capsule_mem;
+    void* capsule_mem = malloc(sizeof(ocp_model_solver_capsule));
+    ocp_model_solver_capsule *capsule = (ocp_model_solver_capsule *) capsule_mem;
 
     return capsule;
 }
 
 
-int ocp_model_acados_free_capsule(nlp_solver_capsule *capsule)
+int ocp_model_acados_free_capsule(ocp_model_solver_capsule *capsule)
 {
     free(capsule);
     return 0;
 }
 
 
-int ocp_model_acados_create(nlp_solver_capsule * capsule)
+int ocp_model_acados_create(ocp_model_solver_capsule * capsule)
 {
     int status = 0;
 
@@ -259,7 +259,7 @@ int ocp_model_acados_create(nlp_solver_capsule * capsule)
         capsule->forw_vde_casadi[i].casadi_sparsity_in = &ocp_model_expl_vde_forw_sparsity_in;
         capsule->forw_vde_casadi[i].casadi_sparsity_out = &ocp_model_expl_vde_forw_sparsity_out;
         capsule->forw_vde_casadi[i].casadi_work = &ocp_model_expl_vde_forw_work;
-        external_function_param_casadi_create(&capsule->forw_vde_casadi[i], 0);
+        external_function_param_casadi_create(&capsule->forw_vde_casadi[i], 78);
     }
 
     capsule->expl_ode_fun = (external_function_param_casadi *) malloc(sizeof(external_function_param_casadi)*N);
@@ -270,7 +270,7 @@ int ocp_model_acados_create(nlp_solver_capsule * capsule)
         capsule->expl_ode_fun[i].casadi_sparsity_in = &ocp_model_expl_ode_fun_sparsity_in;
         capsule->expl_ode_fun[i].casadi_sparsity_out = &ocp_model_expl_ode_fun_sparsity_out;
         capsule->expl_ode_fun[i].casadi_work = &ocp_model_expl_ode_fun_work;
-        external_function_param_casadi_create(&capsule->expl_ode_fun[i], 0);
+        external_function_param_casadi_create(&capsule->expl_ode_fun[i], 78);
     }
 
 
@@ -315,38 +315,38 @@ int ocp_model_acados_create(nlp_solver_capsule * capsule)
     W_0[9+(NY0) * 9] = 0.01;
     W_0[10+(NY0) * 10] = 0.01;
     W_0[11+(NY0) * 11] = 0.01;
-    // W_0[13+(NY0) * 13] = 0.0001;
-    // W_0[14+(NY0) * 14] = 0.0001;
-    // W_0[15+(NY0) * 15] = 0.0001;
-    // W_0[16+(NY0) * 16] = 0.0001;
-    // W_0[17+(NY0) * 17] = 0.0001;
-    // W_0[18+(NY0) * 18] = 0.0001;
-    // W_0[19+(NY0) * 19] = 0.0001;
-    // W_0[20+(NY0) * 20] = 0.0001;
-    // W_0[21+(NY0) * 21] = 0.0001;
-    // W_0[22+(NY0) * 22] = 0.0001;
-    // W_0[23+(NY0) * 23] = 0.0001;
-    // W_0[24+(NY0) * 24] = 0.0001;
-    // W_0[25+(NY0) * 25] = 0.0001;
-    // W_0[26+(NY0) * 26] = 0.0001;
-    // W_0[27+(NY0) * 27] = 0.0001;
-    // W_0[28+(NY0) * 28] = 0.0001;
-    // W_0[29+(NY0) * 29] = 0.0001;
-    // W_0[30+(NY0) * 30] = 0.0001;
-    // W_0[31+(NY0) * 31] = 0.0001;
-    // W_0[32+(NY0) * 32] = 0.0001;
-    // W_0[33+(NY0) * 33] = 0.0001;
-    // W_0[34+(NY0) * 34] = 0.0001;
-    // W_0[35+(NY0) * 35] = 0.0001;
-    // W_0[36+(NY0) * 36] = 0.0001;
-    // W_0[37+(NY0) * 37] = 0.0001;
-    // W_0[38+(NY0) * 38] = 0.0001;
-    // W_0[39+(NY0) * 39] = 0.0001;
-    // W_0[40+(NY0) * 40] = 0.0001;
-    // W_0[41+(NY0) * 41] = 0.0001;
-    // W_0[42+(NY0) * 42] = 0.0001;
-    // W_0[43+(NY0) * 43] = 0.0001;
-    // W_0[44+(NY0) * 44] = 0.0001;
+    W_0[13+(NY0) * 13] = 0.0001;
+    W_0[14+(NY0) * 14] = 0.0001;
+    W_0[15+(NY0) * 15] = 0.0001;
+    W_0[16+(NY0) * 16] = 0.0001;
+    W_0[17+(NY0) * 17] = 0.0001;
+    W_0[18+(NY0) * 18] = 0.0001;
+    W_0[19+(NY0) * 19] = 0.0001;
+    W_0[20+(NY0) * 20] = 0.0001;
+    W_0[21+(NY0) * 21] = 0.0001;
+    W_0[22+(NY0) * 22] = 0.0001;
+    W_0[23+(NY0) * 23] = 0.0001;
+    W_0[24+(NY0) * 24] = 0.0001;
+    W_0[25+(NY0) * 25] = 0.0001;
+    W_0[26+(NY0) * 26] = 0.0001;
+    W_0[27+(NY0) * 27] = 0.0001;
+    W_0[28+(NY0) * 28] = 0.0001;
+    W_0[29+(NY0) * 29] = 0.0001;
+    W_0[30+(NY0) * 30] = 0.0001;
+    W_0[31+(NY0) * 31] = 0.0001;
+    W_0[32+(NY0) * 32] = 0.0001;
+    W_0[33+(NY0) * 33] = 0.0001;
+    W_0[34+(NY0) * 34] = 0.0001;
+    W_0[35+(NY0) * 35] = 0.0001;
+    W_0[36+(NY0) * 36] = 0.0001;
+    W_0[37+(NY0) * 37] = 0.0001;
+    W_0[38+(NY0) * 38] = 0.0001;
+    W_0[39+(NY0) * 39] = 0.0001;
+    W_0[40+(NY0) * 40] = 0.0001;
+    W_0[41+(NY0) * 41] = 0.0001;
+    W_0[42+(NY0) * 42] = 0.0001;
+    W_0[43+(NY0) * 43] = 0.0001;
+    W_0[44+(NY0) * 44] = 0.0001;
     ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, 0, "W", W_0);
     free(W_0);
 
@@ -372,38 +372,38 @@ int ocp_model_acados_create(nlp_solver_capsule * capsule)
     W[9+(NY) * 9] = 0.01;
     W[10+(NY) * 10] = 0.01;
     W[11+(NY) * 11] = 0.01;
-    // W[13+(NY) * 13] = 0.0001;
-    // W[14+(NY) * 14] = 0.0001;
-    // W[15+(NY) * 15] = 0.0001;
-    // W[16+(NY) * 16] = 0.0001;
-    // W[17+(NY) * 17] = 0.0001;
-    // W[18+(NY) * 18] = 0.0001;
-    // W[19+(NY) * 19] = 0.0001;
-    // W[20+(NY) * 20] = 0.0001;
-    // W[21+(NY) * 21] = 0.0001;
-    // W[22+(NY) * 22] = 0.0001;
-    // W[23+(NY) * 23] = 0.0001;
-    // W[24+(NY) * 24] = 0.0001;
-    // W[25+(NY) * 25] = 0.0001;
-    // W[26+(NY) * 26] = 0.0001;
-    // W[27+(NY) * 27] = 0.0001;
-    // W[28+(NY) * 28] = 0.0001;
-    // W[29+(NY) * 29] = 0.0001;
-    // W[30+(NY) * 30] = 0.0001;
-    // W[31+(NY) * 31] = 0.0001;
-    // W[32+(NY) * 32] = 0.0001;
-    // W[33+(NY) * 33] = 0.0001;
-    // W[34+(NY) * 34] = 0.0001;
-    // W[35+(NY) * 35] = 0.0001;
-    // W[36+(NY) * 36] = 0.0001;
-    // W[37+(NY) * 37] = 0.0001;
-    // W[38+(NY) * 38] = 0.0001;
-    // W[39+(NY) * 39] = 0.0001;
-    // W[40+(NY) * 40] = 0.0001;
-    // W[41+(NY) * 41] = 0.0001;
-    // W[42+(NY) * 42] = 0.0001;
-    // W[43+(NY) * 43] = 0.0001;
-    // W[44+(NY) * 44] = 0.0001;
+    W[13+(NY) * 13] = 0.0001;
+    W[14+(NY) * 14] = 0.0001;
+    W[15+(NY) * 15] = 0.0001;
+    W[16+(NY) * 16] = 0.0001;
+    W[17+(NY) * 17] = 0.0001;
+    W[18+(NY) * 18] = 0.0001;
+    W[19+(NY) * 19] = 0.0001;
+    W[20+(NY) * 20] = 0.0001;
+    W[21+(NY) * 21] = 0.0001;
+    W[22+(NY) * 22] = 0.0001;
+    W[23+(NY) * 23] = 0.0001;
+    W[24+(NY) * 24] = 0.0001;
+    W[25+(NY) * 25] = 0.0001;
+    W[26+(NY) * 26] = 0.0001;
+    W[27+(NY) * 27] = 0.0001;
+    W[28+(NY) * 28] = 0.0001;
+    W[29+(NY) * 29] = 0.0001;
+    W[30+(NY) * 30] = 0.0001;
+    W[31+(NY) * 31] = 0.0001;
+    W[32+(NY) * 32] = 0.0001;
+    W[33+(NY) * 33] = 0.0001;
+    W[34+(NY) * 34] = 0.0001;
+    W[35+(NY) * 35] = 0.0001;
+    W[36+(NY) * 36] = 0.0001;
+    W[37+(NY) * 37] = 0.0001;
+    W[38+(NY) * 38] = 0.0001;
+    W[39+(NY) * 39] = 0.0001;
+    W[40+(NY) * 40] = 0.0001;
+    W[41+(NY) * 41] = 0.0001;
+    W[42+(NY) * 42] = 0.0001;
+    W[43+(NY) * 43] = 0.0001;
+    W[44+(NY) * 44] = 0.0001;
 
     double* yref = calloc(NY, sizeof(double));
     // change only the non-zero elements:
@@ -571,22 +571,22 @@ int ocp_model_acados_create(nlp_solver_capsule * capsule)
     W_e[9+(NYN) * 9] = 0.01;
     W_e[10+(NYN) * 10] = 0.01;
     W_e[11+(NYN) * 11] = 0.01;
-    // W_e[13+(NYN) * 13] = 0.0001;
-    // W_e[14+(NYN) * 14] = 0.0001;
-    // W_e[15+(NYN) * 15] = 0.0001;
-    // W_e[16+(NYN) * 16] = 0.0001;
-    // W_e[17+(NYN) * 17] = 0.0001;
-    // W_e[18+(NYN) * 18] = 0.0001;
-    // W_e[19+(NYN) * 19] = 0.0001;
-    // W_e[20+(NYN) * 20] = 0.0001;
-    // W_e[21+(NYN) * 21] = 0.0001;
-    // W_e[22+(NYN) * 22] = 0.0001;
-    // W_e[23+(NYN) * 23] = 0.0001;
-    // W_e[24+(NYN) * 24] = 0.0001;
-    // W_e[25+(NYN) * 25] = 0.0001;
-    // W_e[26+(NYN) * 26] = 0.0001;
-    // W_e[27+(NYN) * 27] = 0.0001;
-    // W_e[28+(NYN) * 28] = 0.0001;
+    W_e[13+(NYN) * 13] = 0.0001;
+    W_e[14+(NYN) * 14] = 0.0001;
+    W_e[15+(NYN) * 15] = 0.0001;
+    W_e[16+(NYN) * 16] = 0.0001;
+    W_e[17+(NYN) * 17] = 0.0001;
+    W_e[18+(NYN) * 18] = 0.0001;
+    W_e[19+(NYN) * 19] = 0.0001;
+    W_e[20+(NYN) * 20] = 0.0001;
+    W_e[21+(NYN) * 21] = 0.0001;
+    W_e[22+(NYN) * 22] = 0.0001;
+    W_e[23+(NYN) * 23] = 0.0001;
+    W_e[24+(NYN) * 24] = 0.0001;
+    W_e[25+(NYN) * 25] = 0.0001;
+    W_e[26+(NYN) * 26] = 0.0001;
+    W_e[27+(NYN) * 27] = 0.0001;
+    W_e[28+(NYN) * 28] = 0.0001;
     ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, N, "W", W_e);
     free(W_e);
     double* Vx_e = calloc(NYN*NX, sizeof(double));
@@ -1044,6 +1044,15 @@ int ocp_model_acados_create(nlp_solver_capsule * capsule)
 
 
 
+    // initialize parameters to nominal value
+    double* p = calloc(NP, sizeof(double));
+    
+
+    for (int i = 0; i <= N; i++)
+    {
+        ocp_model_acados_update_params(capsule, i, p, NP);
+    }
+    free(p);
 
     status = ocp_nlp_precompute(capsule->nlp_solver, nlp_in, nlp_out);
 
@@ -1057,23 +1066,49 @@ int ocp_model_acados_create(nlp_solver_capsule * capsule)
 }
 
 
-int ocp_model_acados_update_params(nlp_solver_capsule * capsule, int stage, double *p, int np)
+int ocp_model_acados_update_params(ocp_model_solver_capsule * capsule, int stage, double *p, int np)
 {
     int solver_status = 0;
 
-    int casadi_np = 0;
+    int casadi_np = 78;
     if (casadi_np != np) {
         printf("acados_update_params: trying to set %i parameters for external functions."
             " External function has %i parameters. Exiting.\n", np, casadi_np);
         exit(1);
     }
+    if (stage < 20 && stage >= 0)
+    {
+        capsule->forw_vde_casadi[stage].set_param(capsule->forw_vde_casadi+stage, p);
+        capsule->expl_ode_fun[stage].set_param(capsule->expl_ode_fun+stage, p);
+    
+
+        // constraints
+    
+
+        // cost
+        if (stage == 0)
+        {
+        }
+        else // 0 < stage < N
+        {
+        }
+    }
+
+    else // stage == N
+    {
+        // terminal shooting node has no dynamics
+        // cost
+        // constraints
+    
+    }
+
 
     return solver_status;
 }
 
 
 
-int ocp_model_acados_solve(nlp_solver_capsule * capsule)
+int ocp_model_acados_solve(ocp_model_solver_capsule * capsule)
 {
     // solve NLP 
     int solver_status = ocp_nlp_solve(capsule->nlp_solver, capsule->nlp_in, capsule->nlp_out);
@@ -1082,7 +1117,7 @@ int ocp_model_acados_solve(nlp_solver_capsule * capsule)
 }
 
 
-int ocp_model_acados_free(nlp_solver_capsule * capsule)
+int ocp_model_acados_free(ocp_model_solver_capsule * capsule)
 {
     // free memory
     ocp_nlp_solver_opts_destroy(capsule->nlp_opts);
@@ -1095,7 +1130,7 @@ int ocp_model_acados_free(nlp_solver_capsule * capsule)
 
     /* free external function */
     // dynamics
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 20; i++)
     {
         external_function_param_casadi_free(&capsule->forw_vde_casadi[i]);
         external_function_param_casadi_free(&capsule->expl_ode_fun[i]);
@@ -1110,16 +1145,16 @@ int ocp_model_acados_free(nlp_solver_capsule * capsule)
     return 0;
 }
 
-ocp_nlp_in *ocp_model_acados_get_nlp_in(nlp_solver_capsule * capsule) { return capsule->nlp_in; }
-ocp_nlp_out *ocp_model_acados_get_nlp_out(nlp_solver_capsule * capsule) { return capsule->nlp_out; }
-ocp_nlp_solver *ocp_model_acados_get_nlp_solver(nlp_solver_capsule * capsule) { return capsule->nlp_solver; }
-ocp_nlp_config *ocp_model_acados_get_nlp_config(nlp_solver_capsule * capsule) { return capsule->nlp_config; }
-void *ocp_model_acados_get_nlp_opts(nlp_solver_capsule * capsule) { return capsule->nlp_opts; }
-ocp_nlp_dims *ocp_model_acados_get_nlp_dims(nlp_solver_capsule * capsule) { return capsule->nlp_dims; }
-ocp_nlp_plan *ocp_model_acados_get_nlp_plan(nlp_solver_capsule * capsule) { return capsule->nlp_solver_plan; }
+ocp_nlp_in *ocp_model_acados_get_nlp_in(ocp_model_solver_capsule * capsule) { return capsule->nlp_in; }
+ocp_nlp_out *ocp_model_acados_get_nlp_out(ocp_model_solver_capsule * capsule) { return capsule->nlp_out; }
+ocp_nlp_solver *ocp_model_acados_get_nlp_solver(ocp_model_solver_capsule * capsule) { return capsule->nlp_solver; }
+ocp_nlp_config *ocp_model_acados_get_nlp_config(ocp_model_solver_capsule * capsule) { return capsule->nlp_config; }
+void *ocp_model_acados_get_nlp_opts(ocp_model_solver_capsule * capsule) { return capsule->nlp_opts; }
+ocp_nlp_dims *ocp_model_acados_get_nlp_dims(ocp_model_solver_capsule * capsule) { return capsule->nlp_dims; }
+ocp_nlp_plan *ocp_model_acados_get_nlp_plan(ocp_model_solver_capsule * capsule) { return capsule->nlp_solver_plan; }
 
 
-void ocp_model_acados_print_stats(nlp_solver_capsule * capsule)
+void ocp_model_acados_print_stats(ocp_model_solver_capsule * capsule)
 {
     int sqp_iter, stat_m, stat_n, tmp_int;
     ocp_nlp_get(capsule->nlp_config, capsule->nlp_solver, "sqp_iter", &sqp_iter);

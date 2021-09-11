@@ -1,34 +1,7 @@
 /*
- * Copyright 2019 Gianluca Frison, Dimitris Kouzoupis, Robin Verschueren,
- * Andrea Zanelli, Niels van Duijkeren, Jonathan Frey, Tommaso Sartor,
- * Branimir Novoselnik, Rien Quirynen, Rezart Qelibari, Dang Doan,
- * Jonas Koenemann, Yutao Chen, Tobias Schöls, Jonas Schlagenhauf, Moritz Diehl
- *
- * This file is part of acados.
- *
- * The 2-Clause BSD License
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.;
+ * MPC for object transportation developed by
+ * Akash Garg and MArio Selvaggio
+ * Work @ PRISMA Lab, Naples
  */
 
 
@@ -84,7 +57,7 @@ int main()
     }
     fclose(fp);
 
-    nlp_solver_capsule *acados_ocp_capsule = ocp_model_acados_create_capsule();
+    ocp_model_solver_capsule *acados_ocp_capsule = ocp_model_acados_create_capsule();
     int status = ocp_model_acados_create(acados_ocp_capsule);
 
     if (status)
@@ -260,6 +233,170 @@ int main()
     u_init[14] = 0.0;
     u_init[15] = 0.0;
 
+    // set parameters
+    double p[78];
+    
+    p[0] = 2;
+    
+    p[1] = 0;
+    
+    p[2] = 0;
+    
+    p[3] = 0;
+    
+    p[4] = 0;
+    
+    p[5] = 0;
+    
+    p[6] = 0;
+    
+    p[7] = 2;
+    
+    p[8] = 0;
+    
+    p[9] = 0;
+    
+    p[10] = 0;
+    
+    p[11] = 0;
+    
+    p[12] = 0;
+    
+    p[13] = 0;
+    
+    p[14] = 2;
+    
+    p[15] = 0;
+    
+    p[16] = 0;
+    
+    p[17] = 0;
+    
+    p[18] = 0;
+    
+    p[19] = 0;
+    
+    p[20] = 0;
+    
+    p[21] = 10000;
+    
+    p[22] = 0;
+    
+    p[23] = 0;
+    
+    p[24] = 0;
+    
+    p[25] = 0;
+    
+    p[26] = 0;
+    
+    p[27] = 0;
+    
+    p[28] = 10000;
+    
+    p[29] = 0;
+    
+    p[30] = 0;
+    
+    p[31] = 0;
+    
+    p[32] = 0;
+    
+    p[33] = 0;
+    
+    p[34] = 0;
+    
+    p[35] = 10000;
+    
+    p[36] = 0;
+    
+    p[37] = 0;
+    
+    p[38] = 0;
+    
+    p[39] = 0;
+    
+    p[40] = 0;
+    
+    p[41] = 0;
+    
+    p[42] = 0;
+    
+    p[43] = 0;
+    
+    p[44] = 0;
+    
+    p[45] = 0;
+    
+    p[46] = 0;
+    
+    p[47] = 0;
+    
+    p[48] = 0;
+    
+    p[49] = 0;
+    
+    p[50] = 0;
+    
+    p[51] = 0;
+    
+    p[52] = 0;
+    
+    p[53] = 0;
+    
+    p[54] = 0;
+    
+    p[55] = 0;
+    
+    p[56] = 0;
+    
+    p[57] = 0;
+    
+    p[58] = 0;
+    
+    p[59] = 0;
+    
+    p[60] = 0;
+    
+    p[61] = 0;
+    
+    p[62] = 0;
+    
+    p[63] = 0;
+    
+    p[64] = 0;
+    
+    p[65] = 0;
+    
+    p[66] = 0;
+    
+    p[67] = 0;
+    
+    p[68] = 0;
+    
+    p[69] = 0;
+    
+    p[70] = 0;
+    
+    p[71] = 0;
+    
+    p[72] = 0;
+    
+    p[73] = 0;
+    
+    p[74] = 4.95;
+    
+    p[75] = 0;
+    
+    p[76] = 0;
+    
+    p[77] = 0;
+
+    for (int ii = 0; ii <= 20; ii++)
+    {
+        ocp_model_acados_update_params(acados_ocp_capsule, ii, p, 78);
+    }
+
     // prepare evaluation
     int NTIMINGS = 1;
     double min_time = 1e12;
@@ -268,8 +405,8 @@ int main()
     double elapsed_time;
     int sqp_iter;
 
-    double xtraj[29 * (10+1)]; // used to keep the per iteration solution of the ocp
-    double utraj[16 * (10)];
+    double xtraj[29 * (nlp_dims->N+1)]; // used to keep the per iteration solution of the ocp
+    double utraj[16 * (nlp_dims->N)];
 
     // extra code
     double x0[29], u0[16];
@@ -293,11 +430,6 @@ int main()
                 utraj[i*16+j] = ref_traj[i][j+29];
         }
     }
-    /*printf("printing x_traj\n");
-    for (int j = 0; j < 29*11; ++j)
-    {
-        printf("%e\n", xtraj[j]);
-    }*/
 
     // n_iterations start from here
     for (int n_iter = 0; n_iter < 251; ++n_iter)
@@ -339,6 +471,7 @@ int main()
 
             ocp_nlp_out_set(nlp_config, nlp_dims, nlp_out, i, "x", x_init);
             ocp_nlp_out_set(nlp_config, nlp_dims, nlp_out, i, "u", u_init);
+            ocp_model_acados_update_params(acados_ocp_capsule, i, p, 78);
 
             if (i+n_iter >= n_rows) 
                 row_ref = n_rows-1;
@@ -428,6 +561,7 @@ int main()
     //sim
     int n_sim_steps = 1;
     // double x_current[29];
+    ocp_model_acados_sim_update_params(capsule, p, 78);
     // solve sim in loop
     for (int ii = 0; ii < n_sim_steps; ii++)
     {
@@ -470,10 +604,10 @@ int main()
 
     fclose(outfile);
     // free sim solver
-    /*status_sim = ocp_model_acados_sim_free(capsule);
+    status_sim = ocp_model_acados_sim_free(capsule);
     if (status_sim) {
         printf("ocp_model_acados_sim_free() returned status %d. \n", status_sim);
-    }*/
+    }
 
     // free solver
     status = ocp_model_acados_free(acados_ocp_capsule);

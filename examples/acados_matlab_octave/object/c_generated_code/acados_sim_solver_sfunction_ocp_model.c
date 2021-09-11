@@ -56,10 +56,10 @@ static void mdlInitializeSizes (SimStruct *S)
     ssSetNumContStates(S, 0);
     ssSetNumDiscStates(S, 0);
 
-        
+          
 
     // specify the number of input ports
-    if ( !ssSetNumInputPorts(S, 2) )
+    if ( !ssSetNumInputPorts(S, 3) )
         return;
 
     // specify the number of output ports
@@ -71,6 +71,8 @@ static void mdlInitializeSizes (SimStruct *S)
     ssSetInputPortVectorDimension(S, 0, 29);
     // u0
     ssSetInputPortVectorDimension(S, 1, 16);
+    // parameters
+    ssSetInputPortVectorDimension(S, 2, 78);
 
     // specify dimension information for the output ports
     ssSetOutputPortVectorDimension(S, 0, 29 ); // xnext
@@ -79,6 +81,7 @@ static void mdlInitializeSizes (SimStruct *S)
     // should be set to 1 for all inputs used in mdlOutputs
     ssSetInputPortDirectFeedThrough(S, 0, 1);
     ssSetInputPortDirectFeedThrough(S, 1, 1);
+    ssSetInputPortDirectFeedThrough(S, 2, 1);
 
     // one sample time
     ssSetNumSampleTimes(S, 1);
@@ -135,7 +138,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     
 
     // local buffer
-    real_t buffer[29];
+    real_t buffer[78];
 
 
     /* go through inputs */
@@ -164,6 +167,14 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 
 
 
+    // parameters
+    in_sign = ssGetInputPortRealSignalPtrs(S, 2);
+
+    for (int i = 0; i < 78; i++)
+        buffer[i] = (double)(*in_sign[i]);
+
+    // update value of parameters
+    ocp_model_acados_sim_update_params(capsule, buffer, 78);
 
 
     /* call solver */

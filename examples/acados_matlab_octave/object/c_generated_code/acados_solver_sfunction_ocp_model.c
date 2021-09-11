@@ -54,7 +54,7 @@ static void mdlInitializeSizes (SimStruct *S)
     // specify the number of continuous and discrete states
     ssSetNumContStates(S, 0);
     ssSetNumDiscStates(S, 0);// specify the number of input ports
-    if ( !ssSetNumInputPorts(S, 9) )
+    if ( !ssSetNumInputPorts(S, 10) )
         return;
 
     // specify the number of output ports
@@ -66,20 +66,22 @@ static void mdlInitializeSizes (SimStruct *S)
     ssSetInputPortVectorDimension(S, 0, 29);
     // ubx_0
     ssSetInputPortVectorDimension(S, 1, 29);
+    // parameters
+    ssSetInputPortVectorDimension(S, 2, (20+1) * 78);
     // y_ref_0
-    ssSetInputPortVectorDimension(S, 2, 45);
+    ssSetInputPortVectorDimension(S, 3, 45);
     // y_ref
-    ssSetInputPortVectorDimension(S, 3, 405);
+    ssSetInputPortVectorDimension(S, 4, 855);
     // y_ref_e
-    ssSetInputPortVectorDimension(S, 4, 29);
+    ssSetInputPortVectorDimension(S, 5, 29);
     // lbx
-    ssSetInputPortVectorDimension(S, 5, 261);
+    ssSetInputPortVectorDimension(S, 6, 551);
     // ubx
-    ssSetInputPortVectorDimension(S, 6, 261);
+    ssSetInputPortVectorDimension(S, 7, 551);
     // lbu
-    ssSetInputPortVectorDimension(S, 7, 160);
+    ssSetInputPortVectorDimension(S, 8, 320);
     // ubu
-    ssSetInputPortVectorDimension(S, 8, 160);/* specify dimension information for the OUTPUT ports */
+    ssSetInputPortVectorDimension(S, 9, 320);/* specify dimension information for the OUTPUT ports */
     ssSetOutputPortVectorDimension(S, 0, 16 );
     ssSetOutputPortVectorDimension(S, 1, 1 );
     ssSetOutputPortVectorDimension(S, 2, 1 );
@@ -98,6 +100,7 @@ static void mdlInitializeSizes (SimStruct *S)
     ssSetInputPortDirectFeedThrough(S, 6, 1);
     ssSetInputPortDirectFeedThrough(S, 7, 1);
     ssSetInputPortDirectFeedThrough(S, 8, 1);
+    ssSetInputPortDirectFeedThrough(S, 9, 1);
 
     // one sample time
     ssSetNumSampleTimes(S, 1);
@@ -133,7 +136,7 @@ static void mdlInitializeSampleTimes(SimStruct *S)
 
 static void mdlStart(SimStruct *S)
 {
-    nlp_solver_capsule *capsule = ocp_model_acados_create_capsule();
+    ocp_model_solver_capsule *capsule = ocp_model_acados_create_capsule();
     ocp_model_acados_create(capsule);
 
     ssSetUserData(S, (void*)capsule);
@@ -142,7 +145,7 @@ static void mdlStart(SimStruct *S)
 
 static void mdlOutputs(SimStruct *S, int_T tid)
 {
-    nlp_solver_capsule *capsule = ssGetUserData(S);
+    ocp_model_solver_capsule *capsule = ssGetUserData(S);
     ocp_nlp_config *nlp_config = ocp_model_acados_get_nlp_config(capsule);
     ocp_nlp_dims *nlp_dims = ocp_model_acados_get_nlp_dims(capsule);
     ocp_nlp_in *nlp_in = ocp_model_acados_get_nlp_in(capsule);
@@ -151,7 +154,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     InputRealPtrsType in_sign;      
 
     // local buffer
-    real_t buffer[45];
+    real_t buffer[78];
 
     /* go through inputs */
     // lbx_0
@@ -165,10 +168,20 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     for (int i = 0; i < 29; i++)
         buffer[i] = (double)(*in_sign[i]);
     ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, 0, "ubx", buffer);
+    // parameters - stage-variant !!!
+    in_sign = ssGetInputPortRealSignalPtrs(S, 2);
+
+    // update value of parameters
+    for (int ii = 0; ii <= 20; ii++)
+    {
+        for (int jj = 0; jj < 78; jj++)
+            buffer[jj] = (double)(*in_sign[ii*78+jj]);
+        ocp_model_acados_update_params(capsule, ii, buffer, 78);
+    }
 
   
     // y_ref_0
-    in_sign = ssGetInputPortRealSignalPtrs(S, 2);
+    in_sign = ssGetInputPortRealSignalPtrs(S, 3);
 
     for (int i = 0; i < 45; i++)
         buffer[i] = (double)(*in_sign[i]);
@@ -177,9 +190,9 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 
   
     // y_ref - for stages 1 to N-1
-    in_sign = ssGetInputPortRealSignalPtrs(S, 3);
+    in_sign = ssGetInputPortRealSignalPtrs(S, 4);
 
-    for (int ii = 1; ii < 10; ii++)
+    for (int ii = 1; ii < 20; ii++)
     {
         for (int jj = 0; jj < 45; jj++)
             buffer[jj] = (double)(*in_sign[(ii-1)*45+jj]);
@@ -188,39 +201,39 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 
   
     // y_ref_e
-    in_sign = ssGetInputPortRealSignalPtrs(S, 4);
+    in_sign = ssGetInputPortRealSignalPtrs(S, 5);
 
     for (int i = 0; i < 29; i++)
         buffer[i] = (double)(*in_sign[i]);
 
-    ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, 10, "yref", (void *) buffer);
+    ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, 20, "yref", (void *) buffer);
     // lbx
-    in_sign = ssGetInputPortRealSignalPtrs(S, 5);
-    for (int ii = 1; ii < 10; ii++)
+    in_sign = ssGetInputPortRealSignalPtrs(S, 6);
+    for (int ii = 1; ii < 20; ii++)
     {
         for (int jj = 0; jj < 29; jj++)
             buffer[jj] = (double)(*in_sign[(ii-1)*29+jj]);
         ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, ii, "lbx", (void *) buffer);
     }
     // ubx
-    in_sign = ssGetInputPortRealSignalPtrs(S, 6);
-    for (int ii = 1; ii < 10; ii++)
+    in_sign = ssGetInputPortRealSignalPtrs(S, 7);
+    for (int ii = 1; ii < 20; ii++)
     {
         for (int jj = 0; jj < 29; jj++)
             buffer[jj] = (double)(*in_sign[(ii-1)*29+jj]);
         ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, ii, "ubx", (void *) buffer);
     }
     // lbu
-    in_sign = ssGetInputPortRealSignalPtrs(S, 7);
-    for (int ii = 0; ii < 10; ii++)
+    in_sign = ssGetInputPortRealSignalPtrs(S, 8);
+    for (int ii = 0; ii < 20; ii++)
     {
         for (int jj = 0; jj < 16; jj++)
             buffer[jj] = (double)(*in_sign[ii*16+jj]);
         ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, ii, "lbu", (void *) buffer);
     }
     // ubu
-    in_sign = ssGetInputPortRealSignalPtrs(S, 8);
-    for (int ii = 0; ii < 10; ii++)
+    in_sign = ssGetInputPortRealSignalPtrs(S, 9);
+    for (int ii = 0; ii < 20; ii++)
     {
         for (int jj = 0; jj < 16; jj++)
             buffer[jj] = (double)(*in_sign[ii*16+jj]);
@@ -259,7 +272,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 
 static void mdlTerminate(SimStruct *S)
 {
-    nlp_solver_capsule *capsule = ssGetUserData(S);
+    ocp_model_solver_capsule *capsule = ssGetUserData(S);
 
     ocp_model_acados_free(capsule);
     ocp_model_acados_free_capsule(capsule);

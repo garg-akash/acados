@@ -62,6 +62,8 @@ input_note = 'Inputs are:\n1) x0, initial state, size [29]\n ';
 i_in = 2;
 input_note = strcat(input_note, num2str(i_in), ') u, size [16]\n ');
 i_in = i_in + 1;
+input_note = strcat(input_note, num2str(i_in), ') parameters, size [78]\n ');
+i_in = i_in + 1;
 
 
 fprintf(input_note)
