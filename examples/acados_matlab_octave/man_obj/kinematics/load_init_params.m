@@ -27,9 +27,10 @@ dt = 0.01;
 T = 2.5;
 tSteps = 0:dt:T; % time vector in seconds
 [s, sd, sdd] = tpoly(0, 1, tSteps'); % curvilinear abscissa and time derivatives
-tz_eb = 0.03; 
+tz_eb = 0.02 + 0.016; 
+ty_eb = 0;%0.08; 
 R_eb = eye(3); % rotation of body frame wrt ee
-T_eb = [R_eb,[0;0;tz_eb];0 0 0 1];
+T_eb = [R_eb,[0;ty_eb;tz_eb];0 0 0 1];
 
 %% linear trajectory (position)
 pee0 = [0.417,-0.417,0.424]'; %for q = [-45,-30,0,60,0,90] %initial pos of ee wrt world

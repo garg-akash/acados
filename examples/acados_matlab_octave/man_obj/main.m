@@ -147,21 +147,21 @@ nbu = nu; % number of input bounds
 Vx = zeros(ny, nx); for ii=1:nx Vx(ii,ii)=1.0; end % state-to-output matrix in lagrange term
 Vu = zeros(ny, nu); for ii=1:nu Vu(nx+ii,ii)=1.0; end % input-to-output matrix in lagrange term
 Vx_e = zeros(ny_e, nx); for ii=1:nx Vx_e(ii,ii)=1.0; end % state-to-output matrix in mayer term
-Q = blkdiag(0*eye(7),10*eye(7),1e-4*eye(7));
+Q = blkdiag(1e-4*eye(7),1*eye(7),1e-4*eye(7));
 R = 1e-10*eye(nu);
 W = blkdiag(Q, R); % weight matrix in lagrange term
 W_e = Q; % weight matrix in mayer term
 yref = zeros(ny, 1); % output reference in lagrange term
 yref_e = zeros(ny_e, 1); % output reference in mayer term
 % constraints
-x0 = [N_m;q_ref(:,1);zeros(7,1)];
+x0 = [N_tilde;q_ref(:,1);zeros(7,1)];
 Jbx = zeros(nbx, nx); for ii=1:nbx Jbx(ii,ii)=1.0; end
 lbx = [-2000*ones(7,1);deg2rad(-170);deg2rad(-120);deg2rad(-170); ...
        deg2rad(-120);deg2rad(-170);deg2rad(-120);deg2rad(-170);-deg2rad(180)*ones(7,1)];
 ubx = -lbx;
 Jbu = zeros(nbu, nu); for ii=1:nbu Jbu(ii,ii)=1.0; end
-lbu = -1000*ones(nu, 1);
-ubu = 1000*ones(nu, 1);
+lbu = -100000*ones(nu, 1);
+ubu = 100000*ones(nu, 1);
 if (LAMBDA_CONST)
     lbh = -1e-10*ones(16,1);%zeros(16,1); % bounds on lambda constraint
     ubh = 1e10*ones(16,1);
@@ -269,8 +269,10 @@ u_sim = zeros(nu, n_sim);
 x_traj_init = repmat(x0,1, ocp_N+1);
 u_traj_init = zeros(nu, ocp_N);
 
+% lambda_log = pinv(o.G*Fc_hat)*(o.Mb*(Jb*(x_sim(15:21,1)-zeros(7,1))/dt) + ...
+%                 C_o*Jb*x_sim(15:21,ii+1) + o.Nb);
 lambda_log = pinv(o.G*Fc_hat)*(o.Mb*(Jb*(x_sim(15:21,1)-zeros(7,1))/dt) + ...
-                C_o*Jb*x_sim(15:21,ii+1) + o.Nb);
+                 o.Nb);
 tic;
 
 for ii=1:n_sim
@@ -285,7 +287,8 @@ for ii=1:n_sim
     % set parameter
     for k=0:ocp_N-1
 %         ocp.set('p', [M_tilde_inv(:); C_m(:); N_tilde(:); Jb(:); o.Mb(:); C_o(:); o.Nb(:); x_sim(15:21,ii)], k);
-        ocp.set('p', [M_tilde_inv(:); C_m(:); N_tilde(:); Jb(:); o.Mb(:); C_o(:); o.Nb(:); x_traj_init(15:21,k+1)], k);
+        ocp.set('p', [M_tilde(:); C_m(:); N_tilde(:); Jb(:); ...
+            o.Mb(:); C_o(:); o.Nb(:); x_traj_init(15:21,k+1); zeros(42,1)], k);
     end
     
     for k = 0:ocp_N-1 %new - set the reference to track
@@ -313,7 +316,8 @@ for ii=1:n_sim
 	% set input in sim
 	sim.set('u', u_sim(:,ii));
     % set parameter
-    sim.set('p', [M_tilde_inv(:); C_m(:); N_tilde(:); Jb(:); o.Mb(:); C_o(:); o.Nb(:); x_sim(15:21,ii)]);
+    sim.set('p', [M_tilde(:); C_m(:); N_tilde(:); Jb(:);...
+        o.Mb(:); C_o(:); o.Nb(:); x_traj_init(15:21,1); zeros(42,1)]);
 
 	% simulate state
 	sim.solve();
@@ -342,8 +346,8 @@ for ii=1:n_sim
     C_tilde = C_m + Jb'*o.Mb*Jb_dot + Jb'*C_o*Jb;
     N_tilde = N_m + Jb'*o.Nb;
     
-    lambda_log = [lambda_log pinv(o.G*Fc_hat)*(o.Mb*(Jb*(x_sim(15:21,ii+1)-x_sim(15:21,ii))/dt) + ...
-                o.Nb)];
+    lambda_log = [lambda_log pinv(o.G*Fc_hat)*(o.Mb*(Jb*(-x_sim(15:21,ii+1)+...
+        x_sim(15:21,ii))/dt) + o.Nb)];
     
 end
 
