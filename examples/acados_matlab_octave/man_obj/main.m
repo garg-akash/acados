@@ -346,7 +346,7 @@ for ii=1:n_sim
     C_tilde = C_m + Jb'*o.Mb*Jb_dot + Jb'*C_o*Jb;
     N_tilde = N_m + Jb'*o.Nb;
     
-    lambda_log = [lambda_log pinv(o.G*Fc_hat)*(o.Mb*(Jb*(-x_sim(15:21,ii+1)+...
+    lambda_log = [lambda_log pinv(o.G*Fc_hat)*(o.Mb*(Jb*(x_sim(15:21,ii+1)-...
         x_sim(15:21,ii))/dt) + o.Nb)];
     
 end
