@@ -1,5 +1,5 @@
 %% contact params
-mu = 0.5;
+mu = 0.5;%0.75;
 h1 = trvec2tform([-0.02,  0.02, -0.02]); % position of {C_i} in {B}
 h2 = trvec2tform([ 0.02,  0.02, -0.02]);
 h3 = trvec2tform([ 0.02, -0.02, -0.02]);
@@ -28,7 +28,7 @@ T = 2.5;
 tSteps = 0:dt:T; % time vector in seconds
 [s, sd, sdd] = tpoly(0, 1, tSteps'); % curvilinear abscissa and time derivatives
 tz_eb = 0.02 + 0.016; 
-ty_eb = 0;%0.08; 
+ty_eb = 0.08; 
 R_eb = eye(3); % rotation of body frame wrt ee
 T_eb = [R_eb,[0;ty_eb;tz_eb];0 0 0 1];
 

@@ -20,8 +20,8 @@ J_ = reshape(p(64:105),6,7); %body jacobian
 Mo = reshape(p(106:141),6,6);
 Co = reshape(p(142:177),6,6);
 No = reshape(p(178:183),6,1);
-dq_prev = reshape(p(184:190),7,1);  
-Jdot_ = reshape(p(191:232),6,7); %body jacobian dot
+Jdot_ = reshape(p(184:225),6,7);  
+dq_prev = reshape(p(226:232),7,1); %body jacobian dot
 if (LAMBDA_CONST)
 %     expr_h = pinv(G*Fc_hat)*(Mo*(J_*(states(15:21)-dq_prev)/dt) + ...
 %                 Co*J_*states(15:21) + No);

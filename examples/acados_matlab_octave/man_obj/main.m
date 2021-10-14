@@ -288,7 +288,7 @@ for ii=1:n_sim
     for k=0:ocp_N-1
 %         ocp.set('p', [M_tilde_inv(:); C_m(:); N_tilde(:); Jb(:); o.Mb(:); C_o(:); o.Nb(:); x_sim(15:21,ii)], k);
         ocp.set('p', [M_tilde(:); C_m(:); N_tilde(:); Jb(:); ...
-            o.Mb(:); C_o(:); o.Nb(:); x_traj_init(15:21,k+1); zeros(42,1)], k);
+            o.Mb(:); C_o(:); o.Nb(:); zeros(42,1); x_traj_init(15:21,k+1)], k);
     end
     
     for k = 0:ocp_N-1 %new - set the reference to track
@@ -317,7 +317,7 @@ for ii=1:n_sim
 	sim.set('u', u_sim(:,ii));
     % set parameter
     sim.set('p', [M_tilde(:); C_m(:); N_tilde(:); Jb(:);...
-        o.Mb(:); C_o(:); o.Nb(:); x_traj_init(15:21,1); zeros(42,1)]);
+        o.Mb(:); C_o(:); o.Nb(:); zeros(42,1); x_traj_init(15:21,1)]);
 
 	% simulate state
 	sim.solve();
