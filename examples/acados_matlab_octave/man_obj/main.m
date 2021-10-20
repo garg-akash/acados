@@ -147,8 +147,8 @@ nbu = nu; % number of input bounds
 Vx = zeros(ny, nx); for ii=1:nx Vx(ii,ii)=1.0; end % state-to-output matrix in lagrange term
 Vu = zeros(ny, nu); for ii=1:nu Vu(nx+ii,ii)=1.0; end % input-to-output matrix in lagrange term
 Vx_e = zeros(ny_e, nx); for ii=1:nx Vx_e(ii,ii)=1.0; end % state-to-output matrix in mayer term
-Q = blkdiag(1e-4*eye(7),1*eye(7),1e-4*eye(7));
-R = 1e-10*eye(nu);
+Q = blkdiag(1e-4*eye(7),1000*eye(7),1e2*eye(7));
+R = 1e-6*eye(nu);
 W = blkdiag(Q, R); % weight matrix in lagrange term
 W_e = Q; % weight matrix in mayer term
 yref = zeros(ny, 1); % output reference in lagrange term
@@ -157,11 +157,11 @@ yref_e = zeros(ny_e, 1); % output reference in mayer term
 x0 = [N_tilde;q_ref(:,1);zeros(7,1)];
 Jbx = zeros(nbx, nx); for ii=1:nbx Jbx(ii,ii)=1.0; end
 lbx = [-2000*ones(7,1);deg2rad(-170);deg2rad(-120);deg2rad(-170); ...
-       deg2rad(-120);deg2rad(-170);deg2rad(-120);deg2rad(-170);-deg2rad(180)*ones(7,1)];
+       deg2rad(-120);deg2rad(-170);deg2rad(-120);deg2rad(-170);-1000*deg2rad(180)*ones(7,1)];
 ubx = -lbx;
 Jbu = zeros(nbu, nu); for ii=1:nbu Jbu(ii,ii)=1.0; end
-lbu = -100000*ones(nu, 1);
-ubu = 100000*ones(nu, 1);
+lbu = -1000*ones(nu, 1);
+ubu = 1000*ones(nu, 1);
 if (LAMBDA_CONST)
     lbh = -1e-10*ones(16,1);%zeros(16,1); % bounds on lambda constraint
     ubh = 1e10*ones(16,1);
