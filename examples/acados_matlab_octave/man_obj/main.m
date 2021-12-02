@@ -116,7 +116,7 @@ sim_sens_forw = 'false';
 sim_num_stages = 4;
 sim_num_steps = 1;
 % ocp
-ocp_N = 10;
+ocp_N = 20;
 % ocp_nlp_solver = 'sqp';
 ocp_nlp_solver = 'sqp_rti';
 ocp_qp_solver = 'partial_condensing_hpipm';
@@ -129,6 +129,7 @@ ocp_sim_method_num_steps = 1;
 ocp_cost_type = 'linear_ls';
 %ocp_cost_type = 'nonlinear_ls';
 %ocp_cost_type = 'ext_cost';
+ocp_levenberg_marquardt = 0.0;
 
 %% setup problem
 LAMBDA_CONST = 1;
@@ -147,8 +148,12 @@ nbu = nu; % number of input bounds
 Vx = zeros(ny, nx); for ii=1:nx Vx(ii,ii)=1.0; end % state-to-output matrix in lagrange term
 Vu = zeros(ny, nu); for ii=1:nu Vu(nx+ii,ii)=1.0; end % input-to-output matrix in lagrange term
 Vx_e = zeros(ny_e, nx); for ii=1:nx Vx_e(ii,ii)=1.0; end % state-to-output matrix in mayer term
-Q = blkdiag(1e-4*eye(7),1000*eye(7),1e2*eye(7));
+Q = blkdiag(1e-6*eye(7),1e-2*eye(7),1e-4*eye(7));
 R = 1e-6*eye(nu);
+% Q = blkdiag(1e-8,1e-8,1e-6,1e-6,1e-6*eye(3),...
+%     1e-2,1e-2,1e0,1e0,1e0*eye(3),...
+%     1e-5,1e-5,1e-3,1e-3,1e-3*eye(3));
+% R = 1e-8*eye(nu);
 W = blkdiag(Q, R); % weight matrix in lagrange term
 W_e = Q; % weight matrix in mayer term
 yref = zeros(ny, 1); % output reference in lagrange term
@@ -156,12 +161,20 @@ yref_e = zeros(ny_e, 1); % output reference in mayer term
 % constraints
 x0 = [N_tilde;q_ref(:,1);zeros(7,1)];
 Jbx = zeros(nbx, nx); for ii=1:nbx Jbx(ii,ii)=1.0; end
-lbx = [-2000*ones(7,1);deg2rad(-170);deg2rad(-120);deg2rad(-170); ...
-       deg2rad(-120);deg2rad(-170);deg2rad(-120);deg2rad(-170);-1000*deg2rad(180)*ones(7,1)];
+lbx = [-176;-176;-110;-110;-110;-40;-40;...
+        deg2rad(-170);deg2rad(-120);deg2rad(-170); ...
+        deg2rad(-120);deg2rad(-170);deg2rad(-120);deg2rad(-170);...
+        deg2rad(-98);deg2rad(-98);deg2rad(-100); ...
+        deg2rad(-130);deg2rad(-140);deg2rad(-180);deg2rad(-180)];
 ubx = -lbx;
+% % for Rodyman
+% lbx = [-2000*ones(7,1);deg2rad(-160);deg2rad(-130);deg2rad(-60); ...
+%        deg2rad(-135);deg2rad(-150);deg2rad(-120);deg2rad(-150);-2*ones(7,1)];
+% ubx = [2000*ones(7,1);deg2rad(160);deg2rad(170);deg2rad(240); ...
+%        deg2rad(135);deg2rad(150);deg2rad(120);deg2rad(150);2*ones(7,1)];
 Jbu = zeros(nbu, nu); for ii=1:nbu Jbu(ii,ii)=1.0; end
-lbu = -1000*ones(nu, 1);
-ubu = 1000*ones(nu, 1);
+lbu = -10000*ones(nu, 1);
+ubu = 10000*ones(nu, 1);
 if (LAMBDA_CONST)
     lbh = -1e-10*ones(16,1);%zeros(16,1); % bounds on lambda constraint
     ubh = 1e10*ones(16,1);
@@ -211,12 +224,14 @@ ocp_opts.set('param_scheme_N', ocp_N);
 ocp_opts.set('nlp_solver', ocp_nlp_solver);
 ocp_opts.set('qp_solver', ocp_qp_solver);
 if (strcmp(ocp_qp_solver, 'partial_condensing_hpipm'))
-	ocp_opts.set('qp_solver_cond_N', ocp_qp_solver_cond_N);
+	ocp_opts.set('qp_solver_cond_N', ocp_qp_solver_cond_N); %New horizon after partial condensing
 end
+ocp_opts.set('levenberg_marquardt', ocp_levenberg_marquardt);
 ocp_opts.set('sim_method', ocp_sim_method);
 ocp_opts.set('sim_method_num_stages', ocp_sim_method_num_stages);
 ocp_opts.set('sim_method_num_steps', ocp_sim_method_num_steps);
 ocp_opts.set('regularize_method', 'no_regularize');
+%ocp_opts.set('qp_solver_warm_start', 1);
 
 ocp_opts.opts_struct
 
@@ -257,7 +272,7 @@ sim = acados_sim(sim_model, sim_opts);
 sim
 % sim.C_sim
 % sim.C_sim_ext_fun
-
+ocp.generate_c_code
 %% closed loop simulation
 
 n_sim = floor(T/dt);
@@ -271,8 +286,11 @@ u_traj_init = zeros(nu, ocp_N);
 
 % lambda_log = pinv(o.G*Fc_hat)*(o.Mb*(Jb*(x_sim(15:21,1)-zeros(7,1))/dt) + ...
 %                 C_o*Jb*x_sim(15:21,ii+1) + o.Nb);
-lambda_log = pinv(o.G*Fc_hat)*(o.Mb*(Jb*(x_sim(15:21,1)-zeros(7,1))/dt) + ...
-                 o.Nb);
+% lambda_log = pinv(o.G*Fc_hat)*(o.Mb*(Jb*(x_sim(15:21,1)-zeros(7,1))/dt) + ...
+%                  o.Nb);
+ddq = pinv(M_m)*(x_sim(1:7,1) - C_m - N_m);
+ddx = Jb*ddq + Jb_dot*x_sim(15:21,1);
+lambda_log = pinv(o.G*Fc_hat)*(o.Mb*ddx + o.Nb);
 tic;
 
 for ii=1:n_sim
@@ -288,7 +306,8 @@ for ii=1:n_sim
     for k=0:ocp_N-1
 %         ocp.set('p', [M_tilde_inv(:); C_m(:); N_tilde(:); Jb(:); o.Mb(:); C_o(:); o.Nb(:); x_sim(15:21,ii)], k);
         ocp.set('p', [M_tilde(:); C_m(:); N_tilde(:); Jb(:); ...
-            o.Mb(:); C_o(:); o.Nb(:); zeros(42,1); x_traj_init(15:21,k+1)], k);
+            o.Mb(:); C_o(:); o.Nb(:); zeros(42,1); ...
+            M_m(:); C_m(:); N_m(:)], k);
     end
     
     for k = 0:ocp_N-1 %new - set the reference to track
@@ -301,6 +320,9 @@ for ii=1:n_sim
     
 	% solve OCP
 	ocp.solve();
+    
+    % get cost value
+    cost_val_ocp(ii) = ocp.get_cost();
 
 	% get solution
 	%x_traj = ocp.get('x');
@@ -317,7 +339,8 @@ for ii=1:n_sim
 	sim.set('u', u_sim(:,ii));
     % set parameter
     sim.set('p', [M_tilde(:); C_m(:); N_tilde(:); Jb(:);...
-        o.Mb(:); C_o(:); o.Nb(:); zeros(42,1); x_traj_init(15:21,1)]);
+        o.Mb(:); C_o(:); o.Nb(:); zeros(42,1); ...
+        M_m(:); C_m(:); N_m(:)]);
 
 	% simulate state
 	sim.solve();
@@ -346,8 +369,11 @@ for ii=1:n_sim
     C_tilde = C_m + Jb'*o.Mb*Jb_dot + Jb'*C_o*Jb;
     N_tilde = N_m + Jb'*o.Nb;
     
-    lambda_log = [lambda_log pinv(o.G*Fc_hat)*(o.Mb*(Jb*(x_sim(15:21,ii+1)-...
-        x_sim(15:21,ii))/dt) + o.Nb)];
+%     lambda_log = [lambda_log pinv(o.G*Fc_hat)*(o.Mb*(Jb*(x_sim(15:21,ii+1)-...
+%         x_sim(15:21,ii))/dt) + o.Nb)];
+    ddq = pinv(M_m)*(x_sim(1:7,ii) - C_m - N_m);
+    ddx = Jb*ddq + Jb_dot*x_sim(15:21,ii);
+    lambda_log = [lambda_log pinv(o.G*Fc_hat)*(o.Mb*ddx + o.Nb)];
     
 end
 

@@ -137,36 +137,36 @@ xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_7$','Interpreter','latex'
 hold on
 subplot(4,4,8)
 plot(time, lambda_log(8,1:end),'-','linewidth',2)
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_1$','Interpreter','latex')
+xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_8$','Interpreter','latex')
 hold on
 subplot(4,4,9)
 plot(time,lambda_log(9,1:end),'-','linewidth',2)
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_2$','Interpreter','latex')
+xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_9$','Interpreter','latex')
 hold on
 subplot(4,4,10)
 plot(time,lambda_log(10,1:end),'-','linewidth',2)
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_3$','Interpreter','latex')
+xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_{10}$','Interpreter','latex')
 hold on
 subplot(4,4,11)
 plot(time,lambda_log(11,1:end),'-','linewidth',2)
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_4$','Interpreter','latex')
+xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_{11}$','Interpreter','latex')
 hold on
 subplot(4,4,12)
 plot(time,lambda_log(12,1:end),'-','linewidth',2)
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_5$','Interpreter','latex')
+xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_{12}$','Interpreter','latex')
 hold on
 subplot(4,4,13)
 plot(time,lambda_log(13,1:end),'-','linewidth',2)
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_6$','Interpreter','latex')
+xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_{13}$','Interpreter','latex')
 hold on
 subplot(4,4,14)
 plot(time,lambda_log(14,1:end),'-','linewidth',2)
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_7$','Interpreter','latex')
+xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_{14}$','Interpreter','latex')
 hold on
 subplot(4,4,15)
 plot(time,lambda_log(15,1:end),'-','linewidth',2)
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_6$','Interpreter','latex')
+xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_{15}$','Interpreter','latex')
 hold on
 subplot(4,4,16)
 plot(time,lambda_log(16,1:end),'-','linewidth',2)
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_7$','Interpreter','latex')
+xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_{16}$','Interpreter','latex')
