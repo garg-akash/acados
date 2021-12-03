@@ -148,7 +148,7 @@ nbu = nu; % number of input bounds
 Vx = zeros(ny, nx); for ii=1:nx Vx(ii,ii)=1.0; end % state-to-output matrix in lagrange term
 Vu = zeros(ny, nu); for ii=1:nu Vu(nx+ii,ii)=1.0; end % input-to-output matrix in lagrange term
 Vx_e = zeros(ny_e, nx); for ii=1:nx Vx_e(ii,ii)=1.0; end % state-to-output matrix in mayer term
-Q = blkdiag(1e-6*eye(7),1e-2*eye(7),1e-4*eye(7));
+Q = blkdiag(1e-6*eye(7),1e0*eye(7),1e-3*eye(7));
 R = 1e-6*eye(nu);
 % Q = blkdiag(1e-8,1e-8,1e-6,1e-6,1e-6*eye(3),...
 %     1e-2,1e-2,1e0,1e0,1e0*eye(3),...
@@ -288,7 +288,9 @@ u_traj_init = zeros(nu, ocp_N);
 %                 C_o*Jb*x_sim(15:21,ii+1) + o.Nb);
 % lambda_log = pinv(o.G*Fc_hat)*(o.Mb*(Jb*(x_sim(15:21,1)-zeros(7,1))/dt) + ...
 %                  o.Nb);
-ddq = pinv(M_m)*(x_sim(1:7,1) - C_m - N_m);
+Fc_read = zeros(12,1); % to be corrected
+Fb_read = o.G*Fc_read;
+ddq = pinv(M_m)*(x_sim(1:7,1) -Jb'*Fb_read - C_m - N_m);
 ddx = Jb*ddq + Jb_dot*x_sim(15:21,1);
 lambda_log = pinv(o.G*Fc_hat)*(o.Mb*ddx + o.Nb);
 tic;
@@ -307,7 +309,7 @@ for ii=1:n_sim
 %         ocp.set('p', [M_tilde_inv(:); C_m(:); N_tilde(:); Jb(:); o.Mb(:); C_o(:); o.Nb(:); x_sim(15:21,ii)], k);
         ocp.set('p', [M_tilde(:); C_m(:); N_tilde(:); Jb(:); ...
             o.Mb(:); C_o(:); o.Nb(:); zeros(42,1); ...
-            M_m(:); C_m(:); N_m(:)], k);
+            M_m(:); C_m(:); N_m(:); Fc_read], k);
     end
     
     for k = 0:ocp_N-1 %new - set the reference to track
@@ -340,7 +342,7 @@ for ii=1:n_sim
     % set parameter
     sim.set('p', [M_tilde(:); C_m(:); N_tilde(:); Jb(:);...
         o.Mb(:); C_o(:); o.Nb(:); zeros(42,1); ...
-        M_m(:); C_m(:); N_m(:)]);
+        M_m(:); C_m(:); N_m(:); Fc_read]);
 
 	% simulate state
 	sim.solve();
@@ -371,7 +373,8 @@ for ii=1:n_sim
     
 %     lambda_log = [lambda_log pinv(o.G*Fc_hat)*(o.Mb*(Jb*(x_sim(15:21,ii+1)-...
 %         x_sim(15:21,ii))/dt) + o.Nb)];
-    ddq = pinv(M_m)*(x_sim(1:7,ii) - C_m - N_m);
+    Fb_read = o.G*Fc_read;
+    ddq = pinv(M_m)*(x_sim(1:7,ii) - Jb'*Fb_read - C_m - N_m);
     ddx = Jb*ddq + Jb_dot*x_sim(15:21,ii);
     lambda_log = [lambda_log pinv(o.G*Fc_hat)*(o.Mb*ddx + o.Nb)];
     
