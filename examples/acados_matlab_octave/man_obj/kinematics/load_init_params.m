@@ -1,17 +1,20 @@
 %% contact params
 mu = 0.5;%0.75;
-h1 = trvec2tform([-0.02,  0.02, -0.02]); % position of {C_i} in {B}
-h2 = trvec2tform([ 0.02,  0.02, -0.02]);
-h3 = trvec2tform([ 0.02, -0.02, -0.02]);
-h4 = trvec2tform([-0.02, -0.02, -0.02]);
+obj_len = 0.04;
+obj_wd = 0.04;
+obj_ht = 0.04;
+h1 = trvec2tform([-obj_len/2, obj_wd/2, -obj_ht/2]); % position of {C_i} in {B}
+h2 = trvec2tform([ obj_len/2, obj_wd/2, -obj_ht/2]);
+h3 = trvec2tform([ obj_len/2, -obj_wd/2, -obj_ht/2]);
+h4 = trvec2tform([-obj_len/2, -obj_wd/2, -obj_ht/2]);
 c4 = contact(h4, 'pcwf', mu);
 c3 = contact(h3, 'pcwf', mu);
 c2 = contact(h2, 'pcwf', mu);
 c1 = contact(h1, 'pcwf', mu);
 
 %% object params
-m = 0.5;
-I = 1e-4*eye(3);
+m = 0.5; % for cube in lab 0.236;
+I = 1e-4; %for cube in lab 4.5375*1e-5*eye(3);
 
 %% create rigid body
 o = rigidBody(m, I);
@@ -23,12 +26,12 @@ o.reset()
 %plan_trajectory
 %plan trajectory in spatial frame 
 %planned traj is for object and not the EE (use inverse kin to get EE traj)
-dt = 0.01;
+dt = 0.01; %0.008;
 T = 2.5;
 tSteps = 0:dt:T; % time vector in seconds
 [s, sd, sdd] = tpoly(0, 1, tSteps'); % curvilinear abscissa and time derivatives
-tz_eb = 0.02 + 0.016; 
-ty_eb = 0.08; 
+ty_eb = 0.075; 
+tz_eb = 0.07 + 0.0275; 
 R_eb = eye(3); % rotation of body frame wrt ee
 T_eb = [R_eb,[0;ty_eb;tz_eb];0 0 0 1];
 
