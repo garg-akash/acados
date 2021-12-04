@@ -14,7 +14,7 @@ c1 = contact(h1, 'pcwf', mu);
 
 %% object params
 m = 0.5; % for cube in lab 0.236;
-I = 1e-4; %for cube in lab 4.5375*1e-5*eye(3);
+I = 1e-4*eye(3); %for cube in lab 4.5375*1e-5*eye(3);
 
 %% create rigid body
 o = rigidBody(m, I);
