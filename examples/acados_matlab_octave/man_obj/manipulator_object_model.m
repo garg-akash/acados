@@ -14,7 +14,7 @@ p = SX.sym('p', np, 1);
 
 x_dot_expr = [controls ; states(15:21) ; reshape(p(1:49),7,7)\(-reshape(p(50:56),7,1) ...
              -reshape(p(57:63),7,1)+states(1:7))];
-
+         
 % constraint on lambda
 J_ = reshape(p(64:105),6,7); %body jacobian
 
@@ -30,15 +30,18 @@ Mm = reshape(p(226:274),7,7);
 Cm = reshape(p(275:281),7,1);
 Nm = reshape(p(282:288),7,1);
 
-Fc = reshape(p(289:300),12,1);
+Fc = reshape(p(289:300),12,1); % contact force read from gazebo
+Fb = G*Fc;
+
+% x_dot_expr = [controls ; states(15:21) ; Mm\(-Cm -Nm - J_'*Fb + states(1:7))];
 
 if (LAMBDA_CONST)
 %     expr_h = pinv(G*Fc_hat)*(Mo*(J_*(states(15:21)-dq_prev)/dt) + ...
 %                 Co*J_*states(15:21) + No);
 % expr_h = pinv(G*Fc_hat)*(Mo*(J_*(states(15:21)-dq_prev)/dt + Jdot_*states(15:21)) + ...
 %                 No);
-Fb = G*Fc;
-ddq = pinv(Mm)*(states(1:7) -J_'*Fb - Cm - Nm);
+
+ddq = pinv(Mm)*(states(1:7) - J_'*Fb - Cm - Nm);
 ddx = J_*ddq + Jdot_*states(15:21);
 expr_h = pinv(G*Fc_hat)*(Mo*ddx + No);
 

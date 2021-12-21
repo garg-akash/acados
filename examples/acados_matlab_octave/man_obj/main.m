@@ -119,25 +119,33 @@ sim_num_steps = 1;
 ocp_N = 20;
 % ocp_nlp_solver = 'sqp';
 ocp_nlp_solver = 'sqp_rti';
+ocp_nlp_solver_max_iter = 100; % useful when choosing 'sqp'
 ocp_qp_solver = 'partial_condensing_hpipm';
 %ocp_qp_solver = 'full_condensing_hpipm';
 ocp_qp_solver_cond_N = 5;
-%ocp_sim_method = 'erk';
 ocp_sim_method = 'erk';
 ocp_sim_method_num_stages = 4;
 ocp_sim_method_num_steps = 1;
 ocp_cost_type = 'linear_ls';
 %ocp_cost_type = 'nonlinear_ls';
 %ocp_cost_type = 'ext_cost';
+regularize_method = 'no_regularize';
+%regularize_method = 'project';
+%regularize_method = 'project_reduc_hess';
+%regularize_method = 'mirror';
+%regularize_method = 'convexify';
 ocp_levenberg_marquardt = 0.0;
+ocp_nlp_solver_warm_start_first_qp = 1;
+ocp_qp_solver_warm_start = 1;
+ocp_nlp_solver_exact_hessian = 'false';
+ocp_nlp_solver_ext_qp_res = 1;
+ocp_qp_solver_ric_alg = 0;
 
 %% setup problem
 LAMBDA_CONST = 1;
 % manipulator mpc 
 model = manipulator_object_model(o.G,Fc_hat,dt,LAMBDA_CONST);
 % dims
-% T = 2.5; % horizon length time %already defined in load_init_params
-% h = 0.01;
 nx = model.nx; % number of states
 nu = model.nu; % number of inputs
 ny = nx+nu; % number of outputs in lagrange term
@@ -148,8 +156,8 @@ nbu = nu; % number of input bounds
 Vx = zeros(ny, nx); for ii=1:nx Vx(ii,ii)=1.0; end % state-to-output matrix in lagrange term
 Vu = zeros(ny, nu); for ii=1:nu Vu(nx+ii,ii)=1.0; end % input-to-output matrix in lagrange term
 Vx_e = zeros(ny_e, nx); for ii=1:nx Vx_e(ii,ii)=1.0; end % state-to-output matrix in mayer term
-Q = blkdiag(1e-6*eye(7),1e0*eye(7),1e-3*eye(7));
-R = 1e-6*eye(nu);
+Q = blkdiag(1e-6*eye(7),1e0*eye(7),1e-1*eye(7));
+R = 1e-7*eye(nu);
 % Q = blkdiag(1e-8,1e-8,1e-6,1e-6,1e-6*eye(3),...
 %     1e-2,1e-2,1e0,1e0,1e0*eye(3),...
 %     1e-5,1e-5,1e-3,1e-3,1e-3*eye(3));
@@ -166,6 +174,11 @@ lbx = [-176;-176;-110;-110;-110;-40;-40;...
         deg2rad(-120);deg2rad(-170);deg2rad(-120);deg2rad(-170);...
         deg2rad(-98);deg2rad(-98);deg2rad(-100); ...
         deg2rad(-130);deg2rad(-140);deg2rad(-180);deg2rad(-180)];
+% lbx = [-500;-500;-500;-500;-500;-500;-500;...
+%         deg2rad(-170);deg2rad(-170);deg2rad(-170); ...
+%         deg2rad(-170);deg2rad(-170);deg2rad(-170);deg2rad(-170);...
+%         deg2rad(-180);deg2rad(-180);deg2rad(-180); ...
+%         deg2rad(-180);deg2rad(-180);deg2rad(-180);deg2rad(-180)];
 ubx = -lbx;
 % % for Rodyman
 % lbx = [-2000*ones(7,1);deg2rad(-160);deg2rad(-130);deg2rad(-60); ...
@@ -173,11 +186,11 @@ ubx = -lbx;
 % ubx = [2000*ones(7,1);deg2rad(160);deg2rad(170);deg2rad(240); ...
 %        deg2rad(135);deg2rad(150);deg2rad(120);deg2rad(150);2*ones(7,1)];
 Jbu = zeros(nbu, nu); for ii=1:nbu Jbu(ii,ii)=1.0; end
-lbu = -10000*ones(nu, 1);
-ubu = 10000*ones(nu, 1);
+lbu = -1e4*ones(nu, 1);
+ubu = 1e4*ones(nu, 1);
 if (LAMBDA_CONST)
-    lbh = -1e-10*ones(16,1);%zeros(16,1); % bounds on lambda constraint
-    ubh = 1e10*ones(16,1);
+    lbh = -1e-2*ones(16,1);%zeros(16,1); % bounds on lambda constraint
+    ubh = 1e2*ones(16,1);
 end
 %% acados ocp model
 ocp_model = acados_ocp_model();
@@ -222,16 +235,23 @@ ocp_opts.set('compile_interface', compile_interface);
 ocp_opts.set('codgen_model', codgen_model);
 ocp_opts.set('param_scheme_N', ocp_N);
 ocp_opts.set('nlp_solver', ocp_nlp_solver);
+if (strcmp(ocp_nlp_solver, 'sqp'))
+	ocp_opts.set('nlp_solver_max_iter', ocp_nlp_solver_max_iter);
+end
 ocp_opts.set('qp_solver', ocp_qp_solver);
 if (strcmp(ocp_qp_solver, 'partial_condensing_hpipm'))
 	ocp_opts.set('qp_solver_cond_N', ocp_qp_solver_cond_N); %New horizon after partial condensing
+    ocp_opts.set('qp_solver_ric_alg', ocp_qp_solver_ric_alg);
 end
 ocp_opts.set('levenberg_marquardt', ocp_levenberg_marquardt);
 ocp_opts.set('sim_method', ocp_sim_method);
 ocp_opts.set('sim_method_num_stages', ocp_sim_method_num_stages);
 ocp_opts.set('sim_method_num_steps', ocp_sim_method_num_steps);
-ocp_opts.set('regularize_method', 'no_regularize');
-%ocp_opts.set('qp_solver_warm_start', 1);
+ocp_opts.set('regularize_method', regularize_method);
+ocp_opts.set('nlp_solver_warm_start_first_qp', ocp_nlp_solver_warm_start_first_qp);
+ocp_opts.set('qp_solver_warm_start', ocp_qp_solver_warm_start);
+ocp_opts.set('nlp_solver_exact_hessian', ocp_nlp_solver_exact_hessian);
+ocp_opts.set('nlp_solver_ext_qp_res', ocp_nlp_solver_ext_qp_res);
 
 ocp_opts.opts_struct
 
@@ -322,7 +342,7 @@ for ii=1:n_sim
     
 	% solve OCP
 	ocp.solve();
-    
+    ocp.print('stat')
     % get cost value
     cost_val_ocp(ii) = ocp.get_cost();
 
