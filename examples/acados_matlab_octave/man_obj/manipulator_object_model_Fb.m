@@ -1,11 +1,11 @@
-function [model] = manipulator_object_model(G,Fc_hat,dt,LAMBDA_CONST)
+function [model] = manipulator_object_model_Fb(G,Fc_hat,dt,LAMBDA_CONST)
 
 import casadi.*
 
 % system dimensions
 nx = 21;                % last state models parameter
 nu = 7;                 % state noise on parameter
-np = 225 + 63 + 12;     % parameters
+np = 225 + 63 + 6;      % parameters
 
 % dynamics
 states = SX.sym('x', nx, 1);
@@ -29,16 +29,15 @@ Jdot_ = reshape(p(184:225),6,7);
 Mm = reshape(p(226:274),7,7);
 Cm = reshape(p(275:281),7,1);
 Nm = reshape(p(282:288),7,1);
-
-Fc = reshape(p(289:300),12,1);
+Fb = reshape(p(289:294),6,1);
 
 if (LAMBDA_CONST)
 %     expr_h = pinv(G*Fc_hat)*(Mo*(J_*(states(15:21)-dq_prev)/dt) + ...
 %                 Co*J_*states(15:21) + No);
 % expr_h = pinv(G*Fc_hat)*(Mo*(J_*(states(15:21)-dq_prev)/dt + Jdot_*states(15:21)) + ...
 %                 No);
-Fb = G*Fc;
-ddq = pinv(Mm)*(states(1:7) -J_'*Fb - Cm - Nm);
+% Fb = G*Fc;
+ddq = pinv(Mm)*(states(1:7) - J_'*Fb - Cm - Nm);
 ddx = J_*ddq + Jdot_*states(15:21);
 expr_h = pinv(G*Fc_hat)*(Mo*ddx + No);
 
