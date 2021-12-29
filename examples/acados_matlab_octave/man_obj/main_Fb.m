@@ -129,12 +129,12 @@ ocp_sim_method_num_steps = 1;
 ocp_cost_type = 'linear_ls';
 %ocp_cost_type = 'nonlinear_ls';
 %ocp_cost_type = 'ext_cost';
-ocp_levenberg_marquardt = 1e-6;
+ocp_levenberg_marquardt = 1e-3;
 
 %% setup problem
 LAMBDA_CONST = 1;
 % manipulator mpc 
-model = manipulator_object_model_Fb(o.G,Fc_hat,dt,LAMBDA_CONST);
+model = manipulator_object_model_Fb(o.G,LAMBDA_CONST);
 % dims
 % T = 2.5; % horizon length time %already defined in load_init_params
 % h = 0.01;
@@ -165,7 +165,7 @@ lbx = [-176;-176;-110;-110;-110;-40;-40;...
         deg2rad(-170);deg2rad(-120);deg2rad(-170); ...
         deg2rad(-120);deg2rad(-170);deg2rad(-120);deg2rad(-170);...
         deg2rad(-98);deg2rad(-98);deg2rad(-100); ...
-        deg2rad(-130);deg2rad(-140);deg2rad(-180);deg2rad(-180)];
+        deg2rad(-98);deg2rad(-140);deg2rad(-180);deg2rad(-180)];
 ubx = -lbx;
 % % for Rodyman
 % lbx = [-2000*ones(7,1);deg2rad(-160);deg2rad(-130);deg2rad(-60); ...
