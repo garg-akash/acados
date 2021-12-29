@@ -116,9 +116,9 @@ sim_sens_forw = 'false';
 sim_num_stages = 4;
 sim_num_steps = 1;
 % ocp
-ocp_N = 20;
-% ocp_nlp_solver = 'sqp';
-ocp_nlp_solver = 'sqp_rti';
+ocp_N = 30;
+ocp_nlp_solver = 'sqp';
+% ocp_nlp_solver = 'sqp_rti';
 ocp_nlp_solver_max_iter = 100; % useful when choosing 'sqp'
 ocp_qp_solver = 'partial_condensing_hpipm';
 %ocp_qp_solver = 'full_condensing_hpipm';
@@ -144,7 +144,7 @@ ocp_qp_solver_ric_alg = 0;
 %% setup problem
 LAMBDA_CONST = 1;
 % manipulator mpc 
-model = manipulator_object_model(o.G,Fc_hat,dt,LAMBDA_CONST);
+model = manipulator_object_model(o.G,LAMBDA_CONST);
 % dims
 nx = model.nx; % number of states
 nu = model.nu; % number of inputs
@@ -173,7 +173,7 @@ lbx = [-176;-176;-110;-110;-110;-40;-40;...
         deg2rad(-170);deg2rad(-120);deg2rad(-170); ...
         deg2rad(-120);deg2rad(-170);deg2rad(-120);deg2rad(-170);...
         deg2rad(-98);deg2rad(-98);deg2rad(-100); ...
-        deg2rad(-130);deg2rad(-140);deg2rad(-180);deg2rad(-180)];
+        deg2rad(-98);deg2rad(-140);deg2rad(-180);deg2rad(-180)];
 % lbx = [-500;-500;-500;-500;-500;-500;-500;...
 %         deg2rad(-170);deg2rad(-170);deg2rad(-170); ...
 %         deg2rad(-170);deg2rad(-170);deg2rad(-170);deg2rad(-170);...
