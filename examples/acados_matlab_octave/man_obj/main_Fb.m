@@ -173,11 +173,11 @@ ubx = -lbx;
 % ubx = [2000*ones(7,1);deg2rad(160);deg2rad(170);deg2rad(240); ...
 %        deg2rad(135);deg2rad(150);deg2rad(120);deg2rad(150);2*ones(7,1)];
 Jbu = zeros(nbu, nu); for ii=1:nbu Jbu(ii,ii)=1.0; end
-lbu = -10000*ones(nu, 1);
-ubu = 10000*ones(nu, 1);
+lbu = -1000*ones(nu, 1);
+ubu = 1000*ones(nu, 1);
 if (LAMBDA_CONST)
     lbh = -1e-5*ones(16,1);%zeros(16,1); % bounds on lambda constraint
-    ubh = 1e10*ones(16,1);
+    ubh = 1e1*ones(16,1);
 end
 %% acados ocp model
 ocp_model = acados_ocp_model();
