@@ -1,6 +1,6 @@
 clear
 clc
-% close all
+close all
 
 % check that env.sh has been run
 env_run = getenv('ENV_RUN');
@@ -132,12 +132,12 @@ ocp_sim_method_num_steps = 1;
 ocp_cost_type = 'linear_ls';
 %ocp_cost_type = 'nonlinear_ls';
 %ocp_cost_type = 'ext_cost';
-ocp_levenberg_marquardt = 0;
+ocp_levenberg_marquardt = 1e-2;
 
 %% setup problem
 LAMBDA_CONST = 1;
 % manipulator mpc 
-model = manipulator_object_model_Fb(o.G,LAMBDA_CONST);
+model = manipulator_object_model_lambda(o.G);
 % dims
 % T = 2.5; % horizon length time %already defined in load_init_params
 % h = 0.01;
@@ -151,42 +151,37 @@ nbu = nu; % number of input bounds
 Vx = zeros(ny, nx); for ii=1:nx Vx(ii,ii)=1.0; end % state-to-output matrix in lagrange term
 Vu = zeros(ny, nu); for ii=1:nu Vu(nx+ii,ii)=1.0; end % input-to-output matrix in lagrange term
 Vx_e = zeros(ny_e, nx); for ii=1:nx Vx_e(ii,ii)=1.0; end % state-to-output matrix in mayer term
-Q = blkdiag(1e-6*eye(7), 1e0*eye(7), 1e3*eye(7));
-R = 1e-3*eye(nu);
+Q = blkdiag(1e-2*eye(7), 1e7*eye(7), 1e5*eye(7), 1e0*eye(16));
+R = 1e-4*eye(nu);
 % Q = blkdiag(1e-8,1e-8,1e-6,1e-6,1e-6*eye(3),...
 %     1e-2,1e-2,1e0,1e0,1e0*eye(3),...
 %     1e-5,1e-5,1e-3,1e-3,1e-3*eye(3));
 % R = 1e-8*eye(nu);
 W = blkdiag(Q, R); % weight matrix in lagrange term
-W_e = 1e-1*Q; % weight matrix in mayer term
+W_e = 1e-3*Q; % weight matrix in mayer term
 yref = zeros(ny, 1); % output reference in lagrange term
 yref_e = zeros(ny_e, 1); % output reference in mayer term
 % constraints
-x0 = [N_tilde;q_ref(:,1);zeros(7,1)];
+
+x0 = [N_tilde;q_ref(:,1);zeros(7,1); pinv(o.G*Fc_hat)*o.Nb];
 Jbx = zeros(nbx, nx); for ii=1:nbx Jbx(ii,ii)=1.0; end
 lbx = [-176;-176;-110;-110;-110;-40;-40;...
         deg2rad(-170);deg2rad(-120);deg2rad(-170); ...
         deg2rad(-120);deg2rad(-170);deg2rad(-120);deg2rad(-170);...
         deg2rad(-98);deg2rad(-98);deg2rad(-100); ...
-        deg2rad(-98);deg2rad(-140);deg2rad(-180);deg2rad(-180)];
+        deg2rad(-98);deg2rad(-140);deg2rad(-180);deg2rad(-180);
+        1e-3*ones(16,1)];
 ubx = -lbx;
-% % for Rodyman
-% lbx = [-2000*ones(7,1);deg2rad(-160);deg2rad(-130);deg2rad(-60); ...
-%        deg2rad(-135);deg2rad(-150);deg2rad(-120);deg2rad(-150);-2*ones(7,1)];
-% ubx = [2000*ones(7,1);deg2rad(160);deg2rad(170);deg2rad(240); ...
-%        deg2rad(135);deg2rad(150);deg2rad(120);deg2rad(150);2*ones(7,1)];
+ubx(22:37) = 2;
+
 Jbu = zeros(nbu, nu); for ii=1:nbu Jbu(ii,ii)=1.0; end
-lbu = -100*ones(nu, 1);
-ubu = 100*ones(nu, 1);
-if (LAMBDA_CONST)
-    lbh = 1e-3*ones(16,1);%zeros(16,1); % bounds on lambda constraint
-    ubh = 2*ones(16,1);
-    Jsh = eye(16);
-end
+lbu = -1000*ones(nu, 1);
+ubu = 1000*ones(nu, 1);
+
 %% acados ocp model
 ocp_model = acados_ocp_model();
 % ocp_model.set('T', T);
-ocp_model.set('T', dt*ocp_N);
+ocp_model.set('T', ocp_N*dt);
 % symbolics
 ocp_model.set('sym_x', model.sym_x);
 ocp_model.set('sym_u', model.sym_u);
@@ -212,11 +207,6 @@ ocp_model.set('constr_ubx', ubx);
 ocp_model.set('constr_Jbu', Jbu);
 ocp_model.set('constr_lbu', lbu);
 ocp_model.set('constr_ubu', ubu);
-if (LAMBDA_CONST)
-    ocp_model.set('constr_expr_h', model.expr_h);
-    ocp_model.set('constr_lh', lbh);
-    ocp_model.set('constr_uh', ubh);
-end
 
 ocp_model.model_struct
 
@@ -299,6 +289,8 @@ Fc_read = pinv(o.G)*Fb_read;
 ddq = zeros(7,1);
 ddx = zeros(6,1);
 lambda_log = pinv(o.G*Fc_hat)*Fb_read;
+lambda_ref = pinv(o.G*Fc_hat)*o.Nb;
+La_read = lambda_ref;
 tic;
 
 % set trajectory initialization
@@ -309,6 +301,7 @@ for ii=1:n_sim
 	% set x0
     fprintf('iter: %d\n', ii);
     x0 = x_sim(:,ii);
+    x0(22:37) = La_read;
 	ocp.set('constr_x0', x0);
 
     % set parameter
@@ -321,10 +314,10 @@ for ii=1:n_sim
     
     % compute reference
     for k = 0:ocp_N-1 %new - set the reference to track
-        yref = [ref(ocp_N, k+ii, q_ref, dq_ref); zeros(7,1)];
+        yref = [ref(ocp_N, k+ii, q_ref, dq_ref); lambda_ref; zeros(7,1);];
         ocp.set('cost_y_ref', yref, k);
     end
-    yref_e = ref(ocp_N, k+1+ii, q_ref, dq_ref);
+    yref_e = [ref(ocp_N, k+ii+1, q_ref, dq_ref); lambda_ref];
     ocp.set('cost_y_ref_e', yref_e, ocp_N);
     
 	% solve OCP
@@ -340,7 +333,7 @@ for ii=1:n_sim
 
 	% set initial state of sim
 	sim.set('x', x0);
-	% set input in sim
+    % set input in sim
 	sim.set('u', u0);
     % set parameter
     sim.set('p', [M_tilde(:); C_m(:); N_tilde(:); Jb(:);...
@@ -356,6 +349,10 @@ for ii=1:n_sim
 	% get new state
 	x_sim(:,ii+1) = sim.get('xn');
     u_sim(:,ii) = u0;
+    
+    if (ii >= 100 && ii <= 150) % disturbance torque
+        x_sim(1:7,ii+1) = x_sim(1:7,ii+1) + Jb'*[20*sin((ii - 100)/50*pi);0; 0; 0; 0; 0];
+    end
     
     % update dynamic matrices
     Te = LWR.fkine(x_sim(8:14,ii+1)');
@@ -386,11 +383,12 @@ for ii=1:n_sim
     ddx = Jb*ddq + Jb_dot*x_sim(15:21,ii+1);
     Fb_read = o.Mb*ddx + o.Nb;
     Fc_read = pinv(o.G)*Fb_read;
+    La_read = pinv(Fc_hat)*Fc_read;
 
     % store logs
     p_log = [p_log, T_wb(1:3,4)];
     phi_log = [phi_log, rpy(T_wb(1:3,1:3))];
-    lambda_log = [lambda_log pinv(Fc_hat)*Fc_read];
+    lambda_log = [lambda_log La_read];
     dq_log = [dq_log, x_sim(15:21,ii+1)];
     q_log = [q_log, x_sim(8:14,ii+1)]; 
     tau_log = [tau_log, x_sim(1:7,ii+1)];
@@ -410,7 +408,6 @@ end
 avg_time_solve = toc/n_sim
 
 %% PLOTS
-
 % p  
 figure
 for i = 1:3
@@ -445,8 +442,8 @@ plot(dq_log(i,:),'-','linewidth',2)
 grid on
 hold on
 plot(dq_ref(i,1:size(dq_ref,2)),'--','linewidth',2)
-plot(repmat(lbx(7+i),size(dq_log,2)),'--r','linewidth',2) 
-plot(repmat(ubx(7+i),size(dq_log,2)),'--r','linewidth',2)
+plot(repmat(lbx(14+i),size(dq_log,2)),'--r','linewidth',2) 
+plot(repmat(ubx(14+i),size(dq_log,2)),'--r','linewidth',2)
 yl = strcat('$\dot{q}_', strcat(int2str(i), '$'));
 xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
 set(gca, 'FontSize', 10)
@@ -460,8 +457,8 @@ plot(q_log(i,:),'-','linewidth',2)
 grid on
 hold on
 plot(q_ref(i,1:size(q_ref,2)),'--','linewidth',2)
-plot(repmat(lbx(14+i),size(q_log,2)),'--r','linewidth',2) 
-plot(repmat(ubx(14+i),size(q_log,2)),'--r','linewidth',2)
+plot(repmat(lbx(7+i),size(q_log,2)),'--r','linewidth',2) 
+plot(repmat(ubx(7+i),size(q_log,2)),'--r','linewidth',2)
 yl = strcat('$q_', strcat(int2str(i), '$'));
 xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
 set(gca, 'FontSize', 10)
@@ -502,12 +499,15 @@ subplot(4,4,i)
 plot(lambda_log(i,:),'-','linewidth',2)
 grid on
 hold on
-plot(repmat(lbh(i),size(lambda_log,2)),'--r','linewidth',2) 
-plot(repmat(ubh(i),size(lambda_log,2)),'--r','linewidth',2)
+plot(repmat(lbx(21+i),size(lambda_log,2)),'--r','linewidth',2) 
+plot(repmat(ubx(21+i),size(lambda_log,2)),'--r','linewidth',2)
 yl = strcat('$\lambda_{', strcat(int2str(i), '}$'));
 xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
 set(gca, 'FontSize', 10)
 end
+
+save('data_dist.mat', 'p_log', 'phi_log', 'lambda_log', 'dq_log', 'q_log', 'tau_log', 'dtau_log', 'cost_val_ocp', 'q_ref', 'dq_ref', 'p', 'o_wb', 'lbx', 'ubx', 'lbu', 'ubu')
+
 
 %% function definition
 function y = ref(k,instant,q_init,dq_init)
