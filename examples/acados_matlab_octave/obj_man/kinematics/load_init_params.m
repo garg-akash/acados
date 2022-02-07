@@ -24,11 +24,12 @@ o.reset()
 %plan trajectory in spatial frame 
 %planned traj is for object and not the EE (use inverse kin to get EE traj)
 dt = 0.01;
-T = 2.5;
+T = params.sim_tim;
 tSteps = 0:dt:T; % time vector in seconds
 [s, sd, sdd] = tpoly(0, 1, tSteps'); % curvilinear abscissa and time derivatives
-tz_eb = 0.02 + 0.016; 
+tz_eb = 0.03; %0.02 + 0.016; 
 ty_eb = 0; % 0.08; 
+global R_eb
 R_eb = eye(3); % rotation of body frame wrt ee
 T_eb = [R_eb,[0;ty_eb;tz_eb];0 0 0 1];
 

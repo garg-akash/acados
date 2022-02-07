@@ -12,8 +12,13 @@ states = SX.sym('x', nx, 1);
 controls = SX.sym('w', nu, 1);
 p = SX.sym('p', np, 1); 
 
+Mo = reshape(p(1:36),6,6);              % Combined dyn parameter: M
+Co = reshape(p(37:72),6,6);             % Combined dyn parameter: C
+No = reshape(p(73:78),6,1);             % Combined dyn parameter: N
+
+
 x_dot_expr = [zyx2R(states(4:6))*states(7:9); zyx2E(states(4:6))*states(10:12);...
-              reshape(p(1:36),6,6)\(-reshape(p(37:72),6,6)*states(7:12)-reshape(p(73:78),6,1)+ ...
+              Mo\(-Co*states(7:12)-No+ ...
               G*Fc_hat*states(14:29)); 0; controls];
 
 Jb_t = reshape(p(79:120),7,6); %body jacobian transpose
