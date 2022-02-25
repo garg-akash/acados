@@ -1,0 +1,8 @@
+t = 2.5 sec; tau_dot_l = 1000; q_dot_4_l = 98; mu = 0.5 --> show no constraints
+
+t = 1.5 sec; tau_dot_l = 1000; q_dot_4_l = 68; mu = 0.5 --> show constraints on joint velocity
+t = 1.5 sec; tau_dot_l = 250; q_dot_4_l = 98; mu = 0.5 --> show constraints on input
+
+t = 2.5 sec; dist_amp = 15; dist_dur = 100-200 --> show disturbance torque
+t = 2.5 sec; dist_amp = 25; dist_dur = 100-150 --> show disturbance torque
+
