@@ -4,7 +4,7 @@ close all
 
 load_rodyman_dynamic_params;
 
-USE_COPPELIA = 1;
+USE_COPPELIA = 0;
 
 if(USE_COPPELIA)
     coppelia = remApi('remoteApi');
@@ -102,10 +102,10 @@ if(~USE_COPPELIA)
 end
 
 %% Object
-mu = 0.5;%0.75;
-obj_len = 0.04;
-obj_wd = 0.04;
-obj_ht = 0.04;
+mu = 0.2; %0.5;%0.75; % for cube in lab 0.25
+obj_len = 0.06; % for cube in lab 0.06
+obj_wd = 0.06; % for cube in lab 0.06
+obj_ht = 0.07; % for cube in lab 0.07
 h1 = trvec2tform([-obj_len/2, obj_wd/2, -obj_ht/2]); % position of {C_i} in {B}
 h2 = trvec2tform([ obj_len/2, obj_wd/2, -obj_ht/2]);
 h3 = trvec2tform([ obj_len/2, -obj_wd/2, -obj_ht/2]);
@@ -116,8 +116,8 @@ c2 = contact(h2, 'pcwf', mu);
 c1 = contact(h1, 'pcwf', mu);
 
 % object params
-m = 0.5; % for cube in lab 0.236;
-I = 1e-4*eye(3); %for cube in lab 4.5375*1e-5*eye(3);
+m = 0.236; %0.5; % for cube in lab 0.236;
+I = 4.5375*1e-5*eye(3); %1e-4*eye(3); %for cube in lab 4.5375*1e-5*eye(3);
 
 % create rigid body
 o = rigidBody(m, I);
@@ -182,8 +182,8 @@ for i = 1:size(p_ref,1)
     q_ref = [q_ref [q_new(1:2), q_new(4:end)]'];
     dq_ref = [dq_ref dq_new];
 end
-
-fileID = fopen('q_ref.txt','w');
+t = now;
+fileID = fopen(strcat(strcat('q_ref_',datestr(t),'.txt')),'w');
 fprintf(fileID,'%12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f\n', q_ref);
 fclose(fileID);
 
@@ -241,7 +241,7 @@ ocp_sim_method_num_steps = 1;
 ocp_cost_type = 'linear_ls';
 %ocp_cost_type = 'nonlinear_ls';
 %ocp_cost_type = 'ext_cost';
-ocp_levenberg_marquardt = 1e-2;
+ocp_levenberg_marquardt = 10e0;
 
 %% setup problem
 LAMBDA_CONST = 1;
@@ -260,14 +260,14 @@ nbu = nu; % number of input bounds
 Vx = zeros(ny, nx); for ii=1:nx Vx(ii,ii)=1.0; end % state-to-output matrix in lagrange term
 Vu = zeros(ny, nu); for ii=1:nu Vu(nx+ii,ii)=1.0; end % input-to-output matrix in lagrange term
 Vx_e = zeros(ny_e, nx); for ii=1:nx Vx_e(ii,ii)=1.0; end % state-to-output matrix in mayer term
-Q = blkdiag(1e-2*eye(9), 1e7*eye(9), 1e5*eye(9), 1e0*eye(16));
-R = 1e-4*eye(nu);
+Q = blkdiag(1e-4*eye(9), 1e7*eye(9), 1e5*eye(9), 1e-3*eye(16));
+R = 5e-3*eye(nu);
 % Q = blkdiag(1e-8,1e-8,1e-6,1e-6,1e-6*eye(3),...
 %     1e-2,1e-2,1e0,1e0,1e0*eye(3),...
 %     1e-5,1e-5,1e-3,1e-3,1e-3*eye(3));
 % R = 1e-8*eye(nu);
 W = blkdiag(Q, R); % weight matrix in lagrange term
-W_e = 1e-3*Q; % weight matrix in mayer term
+W_e = 1e-1*Q; % weight matrix in mayer term
 yref = zeros(ny, 1); % output reference in lagrange term
 yref_e = zeros(ny_e, 1); % output reference in mayer term
 % constraints
@@ -347,7 +347,7 @@ ocp
 %ocp.generate_c_code
 
 disp('Simulating...')
-%% acados sim model
+%% acados sim modelopts_struct
 sim_model = acados_sim_model();
 % symbolics
 sim_model.set('sym_x', model.sym_x);
@@ -502,6 +502,7 @@ for ii=1:n_sim
     Fb_read = o.Mb*ddx + o.Nb;
     Fc_read = pinv(o.G)*Fb_read;
     La_read = pinv(Fc_hat)*Fc_read;
+    %La_read = x_sim(28:43,ii+1);
     
     % store logs
     p_log = [p_log, T_wb(1:3,4)];
@@ -518,7 +519,7 @@ for ii=1:n_sim
         fprintf('\nsuccess!\n\n');
     else
         fprintf('\nsolution failed with status %d!\n\n', status);
-        break;
+        %break;
     end
     
 end
@@ -564,7 +565,8 @@ if(USE_COPPELIA)
 end
 
 %% Write data to a file
-fileID = fopen('q_log.txt','w');
+t = now;
+fileID = fopen(strcat(strcat('q_log_',datestr(t),'.txt')),'w');
 fprintf(fileID,'%12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f\n', q_log);
 fclose(fileID);
 
@@ -596,12 +598,19 @@ for i = 1:3
 end
 
 % dq
+dq_log_f = dq_log;
+for i = 2 : size(q_log,2)
+    for j = 1 : size(q_log,1)
+        dq_log_f(j,i) = 0.15*dq_log_f(j,i) + 0.85*dq_log_f(j,i-1);
+    end
+end
 figure
 for i = 1:9
     subplot(3,3,i)
     plot(dq_log(i,:),'-','linewidth',2)
     grid on
     hold on
+    plot(dq_log_f(i,:),'-','linewidth',2)
     plot(dq_ref(i,1:size(dq_ref,2)),'--','linewidth',2)
     plot(repmat(lbx(14+i),size(dq_log,2)),'--r','linewidth',2)
     plot(repmat(ubx(14+i),size(dq_log,2)),'--r','linewidth',2)
@@ -611,12 +620,20 @@ for i = 1:9
 end
 
 % q
+q_log_f = q_log;
+for i = 2 : size(q_log,2)
+    for j = 1 : size(q_log,1)
+        q_log_f(j,i) = 0.01*q_log_f(j,i) + 0.99*q_log_f(j,i-1);
+    end
+end
+
 figure
 for i = 1:9
     subplot(3,3,i)
     plot(q_log(i,:),'-','linewidth',2)
     grid on
     hold on
+    plot(q_log_f(i,:),'-','linewidth',2)
     plot(q_ref(i,1:size(q_ref,2)),'--','linewidth',2)
     plot(repmat(lbx(7+i),size(q_log,2)),'--r','linewidth',2)
     plot(repmat(ubx(7+i),size(q_log,2)),'--r','linewidth',2)
@@ -671,8 +688,11 @@ if(~USE_COPPELIA)
     figure(1)
     Rodyman.plot(toRodyman(q_log)')
 end
-save('data_rodyman.mat', 'p_log', 'phi_log', 'lambda_log', 'dq_log', 'q_log', 'tau_log', 'dtau_log', 'cost_val_ocp', 'q_ref', 'dq_ref', 'p_ref', 'o_ref', 'lbx', 'ubx', 'lbu', 'ubu')
 
+save(strcat(strcat('data_rodyman_',datestr(t),'.mat')), 'p_log', 'phi_log', 'lambda_log', 'dq_log', 'q_log', 'tau_log', 'dtau_log', 'cost_val_ocp', 'q_ref', 'dq_ref', 'p_ref', 'o_ref', 'lbx', 'ubx', 'lbu', 'ubu')
+fileID = fopen(strcat(strcat('q_log_f',datestr(t),'.txt')),'w');
+fprintf(fileID,'%12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f\n', q_log_f);
+fclose(fileID);
 
 %% function definition
 function y = ref(k,instant,q_init,dq_init)
