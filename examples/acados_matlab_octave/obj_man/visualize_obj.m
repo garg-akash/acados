@@ -12,7 +12,8 @@ time = 0:dt:T;
 
 
 pref = p_ref;
-pobj = x_sim(1:3,1:end)';
+% pobj = x_sim(1:3,1:end)';
+pobj = xx(1:3,:)';
 % tm = linspace(0,epsilon_t*size(pref,1),size(pref,1));
 % tm = linspace(0,traj_init+traj_dur+traj_last,size(pref,1));
 tm = time;
@@ -25,7 +26,7 @@ hold on
 line1 = plot(tm,pref(:,1),'--k','linewidth',2,'DisplayName','ref');
 grid(ax1,'on')
 ylim([min(pobj(:,1))-0.25 max(pobj(:,1))+0.25])
-xlabel('t [s]','Interpreter','latex');ylabel('x [m]','Interpreter','latex')
+xlabel('t [s]');ylabel('x [m]','Interpreter','latex')
 hold on
 
 ax2 = subplot(3,1,2);
@@ -33,7 +34,7 @@ line4 = plot(tm,pobj(:,2),'-r','linewidth',2);
 hold on
 line3 = plot(tm,pref(:,2),'--k','linewidth',2);
 grid(ax2,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('y [m]','Interpreter','latex')
+xlabel('t [s]');ylabel('y [m]','Interpreter','latex')
 hold on
 
 ax3 = subplot(3,1,3);
@@ -42,11 +43,13 @@ hold on
 lin5 = plot(tm,pref(:,3),'--k','linewidth',2);
 grid(ax3,'on')
 ylim([min(pobj(:,3))-0.25 max(pobj(:,3))+0.25])
-xlabel('t [s]','Interpreter','latex');ylabel('z [m]','Interpreter','latex')
+xlabel('t [s]');ylabel('z [m]','Interpreter','latex')
 
 lg = legend(subplot(3,1,1), [line1,line2]);
 lg.Location = 'northoutside';
 lg.Orientation = 'horizontal';
+saveas(gcf,'pref_12_c.png')
+saveas(gcf,'oonly_pref.png')
 print -depsc pref
 
 %% orientation plots 
@@ -361,7 +364,7 @@ line1 = plot(tm,lam(:,1),'-','linewidth',2,'DisplayName','NMPC')
 hold on
 line2 = plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lim}$')
 grid(ax1,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_1$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_1$','Interpreter','latex')
 hold on
 
 ax2 = subplot(4,4,2)
@@ -369,7 +372,7 @@ plot(tm,lam(:,2),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax2,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_2$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_2$','Interpreter','latex')
 hold on
 
 ax3 = subplot(4,4,3)
@@ -377,7 +380,7 @@ plot(tm,lam(:,3),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax3,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_3$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_3$','Interpreter','latex')
 hold on
 
 ax4 = subplot(4,4,4)
@@ -385,7 +388,7 @@ plot(tm,lam(:,4),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax4,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_4$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_4$','Interpreter','latex')
 hold on
 
 ax5 = subplot(4,4,5)
@@ -393,7 +396,7 @@ plot(tm,lam(:,5),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax5,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_5$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_5$','Interpreter','latex')
 hold on
 
 ax6 = subplot(4,4,6)
@@ -401,7 +404,7 @@ plot(tm,lam(:,6),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax6,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_6$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_6$','Interpreter','latex')
 hold on
 
 ax7 = subplot(4,4,7)
@@ -409,7 +412,7 @@ plot(tm,lam(:,7),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax7,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_7$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_7$','Interpreter','latex')
 hold on
 
 ax8 = subplot(4,4,8)
@@ -417,7 +420,7 @@ plot(tm,lam(:,8),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax8,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_8$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_8$','Interpreter','latex')
 hold on
 
 ax9 = subplot(4,4,9)
@@ -425,7 +428,7 @@ plot(tm,lam(:,9),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax9,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_9$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_9$','Interpreter','latex')
 hold on
 
 ax10 = subplot(4,4,10)
@@ -433,7 +436,7 @@ plot(tm,lam(:,10),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax10,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_{10}$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_{10}$','Interpreter','latex')
 hold on
 
 ax11 = subplot(4,4,11)
@@ -441,7 +444,7 @@ plot(tm,lam(:,11),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax11,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_{11}$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_{11}$','Interpreter','latex')
 hold on
 
 ax12 = subplot(4,4,12)
@@ -449,7 +452,7 @@ plot(tm,lam(:,12),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax12,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_{12}$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_{12}$','Interpreter','latex')
 hold on
 
 ax13 = subplot(4,4,13)
@@ -457,7 +460,7 @@ plot(tm,lam(:,13),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax13,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_{13}$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_{13}$','Interpreter','latex')
 hold on
 
 ax14 = subplot(4,4,14)
@@ -465,7 +468,7 @@ plot(tm,lam(:,14),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax14,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_{14}$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_{14}$','Interpreter','latex')
 hold on
 
 ax15 = subplot(4,4,15)
@@ -473,7 +476,7 @@ plot(tm,lam(:,15),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax15,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_{15}$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_{15}$','Interpreter','latex')
 hold on
 
 ax16 = subplot(4,4,16)
@@ -481,14 +484,14 @@ plot(tm,lam(:,16),'-','linewidth',2)
 hold on
 plot(tm,repmat(lam_lim,size(lam(:,1))),'--k','linewidth',2,'DisplayName','$\Lambda_{lb}$')
 grid(ax16,'on')
-xlabel('t [s]','Interpreter','latex');ylabel('$\Lambda_{16}$','Interpreter','latex')
+xlabel('t [s]','fontweight','bold');ylabel('$\Lambda_{16}$','Interpreter','latex')
 
 lg = legend(subplot(4,4,2), [line2,line1],'Interpreter','latex');
 lg.Location = 'northoutside';
 lg.Orientation = 'horizontal';
 lg.Position(1) = 0.5 - lg.Position(3)/2; 
 lg.Position(2) = 1-lg.Position(4);%0.5 - lg.Position(4)/2;
-%saveas(gcf,'lam_from_fc_read_long_way.png')
+%saveas(gcf,'lam_12_c.png')
 print -depsc lam
 
 

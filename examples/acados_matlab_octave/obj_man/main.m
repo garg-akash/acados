@@ -1,4 +1,4 @@
-clear all
+% clear all
 clc
 close all
 
@@ -14,7 +14,7 @@ show_plots = true;
 save_plots = false;
 show_video = true;
 save_video = true;
-video_title = "video_";
+video_title = "video_12_c_22";
 
 %%
 addpath('./kinematics/')
@@ -116,10 +116,10 @@ for i=1:size(tSteps,2)
 end
 
 %% 
-% o.reset();
-% Fc_hat = blkdiag(o.contacts(1).x_hat_, o.contacts(2).x_hat_, o.contacts(3).x_hat_, o.contacts(4).x_hat_);
-% R_eb = T_eb(1:3,1:3);
-% Ad_eb = [[R_eb,skew(T_eb(1:3,4))*R_eb];[zeros(3),R_eb]];
+o.reset();
+Fc_hat = blkdiag(o.contacts(1).x_hat_, o.contacts(2).x_hat_, o.contacts(3).x_hat_, o.contacts(4).x_hat_);
+R_eb = T_eb(1:3,1:3);
+Ad_eb = [[R_eb,skew(T_eb(1:3,4))*R_eb];[zeros(3),R_eb]];
 
 % o.computeN(Te.R);
 % N_o = o.Nb;
@@ -221,105 +221,105 @@ if (TAU_CONST)
 end
 
 %% acados ocp model
-ocp_model = acados_ocp_model();
-% ocp_model.set('T', T);
-ocp_model.set('T', dt*ocp_N);
-% symbolics
-ocp_model.set('sym_x', model.sym_x);
-ocp_model.set('sym_u', model.sym_u);
-ocp_model.set('sym_p', model.sym_p);
-% ocp_model.set('sym_xdot', model.sym_xdot);
-% cost
-ocp_model.set('cost_type', ocp_cost_type);
-ocp_model.set('cost_type_e', ocp_cost_type);
-ocp_model.set('cost_Vu', Vu);
-ocp_model.set('cost_Vx', Vx);
-ocp_model.set('cost_Vx_e', Vx_e);
-ocp_model.set('cost_W', W);
-ocp_model.set('cost_W_e', W_e);
-ocp_model.set('cost_y_ref', yref);
-ocp_model.set('cost_y_ref_e', yref_e);
-% dynamics
-ocp_model.set('dyn_type', 'explicit');
-ocp_model.set('dyn_expr_f', model.expr_f_expl);
-% constraints
-ocp_model.set('constr_x0', x0);
-ocp_model.set('constr_Jbx', Jbx);
-ocp_model.set('constr_lbx', lbx);
-ocp_model.set('constr_ubx', ubx);
-ocp_model.set('constr_Jbu', Jbu);
-ocp_model.set('constr_lbu', lbu);
-ocp_model.set('constr_ubu', ubu);
-if (TAU_CONST)
-    ocp_model.set('constr_expr_h', model.expr_h);
-    ocp_model.set('constr_lh', lbh);
-    ocp_model.set('constr_uh', ubh);
-end
-ocp_model.model_struct
-
-%% acados ocp opts
-ocp_opts = acados_ocp_opts();
-ocp_opts.set('compile_interface', compile_interface);
-ocp_opts.set('codgen_model', codgen_model);
-ocp_opts.set('param_scheme_N', ocp_N);
-ocp_opts.set('nlp_solver', ocp_nlp_solver);
-if (strcmp(ocp_nlp_solver, 'sqp'))
-	ocp_opts.set('nlp_solver_max_iter', ocp_nlp_solver_max_iter);
-end
-ocp_opts.set('qp_solver', ocp_qp_solver);
-if (strcmp(ocp_qp_solver, 'partial_condensing_hpipm'))
-	ocp_opts.set('qp_solver_cond_N', ocp_qp_solver_cond_N);
-    ocp_opts.set('qp_solver_ric_alg', ocp_qp_solver_ric_alg);
-end
-ocp_opts.set('levenberg_marquardt', ocp_levenberg_marquardt);
-ocp_opts.set('sim_method', ocp_sim_method);
-ocp_opts.set('sim_method_num_stages', ocp_sim_method_num_stages);
-ocp_opts.set('sim_method_num_steps', ocp_sim_method_num_steps);
-ocp_opts.set('regularize_method', regularize_method);
-ocp_opts.set('nlp_solver_warm_start_first_qp', ocp_nlp_solver_warm_start_first_qp);
-ocp_opts.set('qp_solver_warm_start', ocp_qp_solver_warm_start);
-ocp_opts.set('nlp_solver_exact_hessian', ocp_nlp_solver_exact_hessian);
-ocp_opts.set('nlp_solver_ext_qp_res', ocp_nlp_solver_ext_qp_res);
-
-ocp_opts.opts_struct
-
-%% acados ocp
-% create ocp
-ocp = acados_ocp(ocp_model, ocp_opts);
-ocp
-
-%% acados sim model
-sim_model = acados_sim_model();
-% symbolics
-sim_model.set('sym_x', model.sym_x);
-sim_model.set('sym_u', model.sym_u);
-sim_model.set('sym_p', model.sym_p);
-% sim_model.set('sym_xdot', model.sym_xdot);
-% model
-% sim_model.set('T', T/ocp_N);
-sim_model.set('T', dt);
-sim_model.set('dyn_type', 'explicit');
-sim_model.set('dyn_expr_f', model.expr_f_expl);
-
-sim_model.model_struct
-
-%% acados sim opts
-sim_opts = acados_sim_opts();
-sim_opts.set('compile_interface', compile_interface);
-sim_opts.set('codgen_model', codgen_model);
-sim_opts.set('num_stages', sim_num_stages);
-sim_opts.set('num_steps', sim_num_steps);
-sim_opts.set('method', sim_method);
-sim_opts.set('sens_forw', sim_sens_forw);
-
-sim_opts.opts_struct
-
-%% acados sim
-% create sim
-sim = acados_sim(sim_model, sim_opts);
-sim
-% sim.C_sim
-% sim.C_sim_ext_fun
+% ocp_model = acados_ocp_model();
+% % ocp_model.set('T', T);
+% ocp_model.set('T', dt*ocp_N);
+% % symbolics
+% ocp_model.set('sym_x', model.sym_x);
+% ocp_model.set('sym_u', model.sym_u);
+% ocp_model.set('sym_p', model.sym_p);
+% % ocp_model.set('sym_xdot', model.sym_xdot);
+% % cost
+% ocp_model.set('cost_type', ocp_cost_type);
+% ocp_model.set('cost_type_e', ocp_cost_type);
+% ocp_model.set('cost_Vu', Vu);
+% ocp_model.set('cost_Vx', Vx);
+% ocp_model.set('cost_Vx_e', Vx_e);
+% ocp_model.set('cost_W', W);
+% ocp_model.set('cost_W_e', W_e);
+% ocp_model.set('cost_y_ref', yref);
+% ocp_model.set('cost_y_ref_e', yref_e);
+% % dynamics
+% ocp_model.set('dyn_type', 'explicit');
+% ocp_model.set('dyn_expr_f', model.expr_f_expl);
+% % constraints
+% ocp_model.set('constr_x0', x0);
+% ocp_model.set('constr_Jbx', Jbx);
+% ocp_model.set('constr_lbx', lbx);
+% ocp_model.set('constr_ubx', ubx);
+% ocp_model.set('constr_Jbu', Jbu);
+% ocp_model.set('constr_lbu', lbu);
+% ocp_model.set('constr_ubu', ubu);
+% if (TAU_CONST)
+%     ocp_model.set('constr_expr_h', model.expr_h);
+%     ocp_model.set('constr_lh', lbh);
+%     ocp_model.set('constr_uh', ubh);
+% end
+% ocp_model.model_struct
+% 
+% %% acados ocp opts
+% ocp_opts = acados_ocp_opts();
+% ocp_opts.set('compile_interface', compile_interface);
+% ocp_opts.set('codgen_model', codgen_model);
+% ocp_opts.set('param_scheme_N', ocp_N);
+% ocp_opts.set('nlp_solver', ocp_nlp_solver);
+% if (strcmp(ocp_nlp_solver, 'sqp'))
+% 	ocp_opts.set('nlp_solver_max_iter', ocp_nlp_solver_max_iter);
+% end
+% ocp_opts.set('qp_solver', ocp_qp_solver);
+% if (strcmp(ocp_qp_solver, 'partial_condensing_hpipm'))
+% 	ocp_opts.set('qp_solver_cond_N', ocp_qp_solver_cond_N);
+%     ocp_opts.set('qp_solver_ric_alg', ocp_qp_solver_ric_alg);
+% end
+% ocp_opts.set('levenberg_marquardt', ocp_levenberg_marquardt);
+% ocp_opts.set('sim_method', ocp_sim_method);
+% ocp_opts.set('sim_method_num_stages', ocp_sim_method_num_stages);
+% ocp_opts.set('sim_method_num_steps', ocp_sim_method_num_steps);
+% ocp_opts.set('regularize_method', regularize_method);
+% ocp_opts.set('nlp_solver_warm_start_first_qp', ocp_nlp_solver_warm_start_first_qp);
+% ocp_opts.set('qp_solver_warm_start', ocp_qp_solver_warm_start);
+% ocp_opts.set('nlp_solver_exact_hessian', ocp_nlp_solver_exact_hessian);
+% ocp_opts.set('nlp_solver_ext_qp_res', ocp_nlp_solver_ext_qp_res);
+% 
+% ocp_opts.opts_struct
+% 
+% %% acados ocp
+% % create ocp
+% ocp = acados_ocp(ocp_model, ocp_opts);
+% ocp
+% 
+% %% acados sim model
+% sim_model = acados_sim_model();
+% % symbolics
+% sim_model.set('sym_x', model.sym_x);
+% sim_model.set('sym_u', model.sym_u);
+% sim_model.set('sym_p', model.sym_p);
+% % sim_model.set('sym_xdot', model.sym_xdot);
+% % model
+% % sim_model.set('T', T/ocp_N);
+% sim_model.set('T', dt);
+% sim_model.set('dyn_type', 'explicit');
+% sim_model.set('dyn_expr_f', model.expr_f_expl);
+% 
+% sim_model.model_struct
+% 
+% %% acados sim opts
+% sim_opts = acados_sim_opts();
+% sim_opts.set('compile_interface', compile_interface);
+% sim_opts.set('codgen_model', codgen_model);
+% sim_opts.set('num_stages', sim_num_stages);
+% sim_opts.set('num_steps', sim_num_steps);
+% sim_opts.set('method', sim_method);
+% sim_opts.set('sens_forw', sim_sens_forw);
+% 
+% sim_opts.opts_struct
+% 
+% %% acados sim
+% % create sim
+% sim = acados_sim(sim_model, sim_opts);
+% sim
+% % sim.C_sim
+% % sim.C_sim_ext_fun
 
 %% closed loop simulation
 
@@ -383,7 +383,7 @@ if(show_video)
         frames = [];
     end
 end
-
+ev = [];
 for ii=1:n_sim
 
 	% set x0
@@ -399,11 +399,12 @@ for ii=1:n_sim
         ocp.set('p', [M_o(:); C_o(:); N_o(:); Jb_t(:);...
             M_t(:); C_t(:); N_t(:); x_traj_init(7:12,k+1)], k);
     end
-    
+    ref_log = [];
     for k = 0:ocp_N-1 %new - set the reference to track
         yref = ref(zyx2R(x_sim(4:6,ii)), p_ref, pd_ref, ocp_N, k+ii, o_ref, w_ref,lm_ref(1,:)');
         yref = [yref;zeros(16,1)];
         ocp.set('cost_y_ref', yref, k);
+        ref_log(:,k+1) = yref;
     end
     yref_e = ref(zyx2R(x_sim(4:6,ii)), p_ref, pd_ref, ocp_N, k+ii, o_ref, w_ref,lm_ref(1,:)');
     ocp.set('cost_y_ref_e', yref_e, ocp_N);
@@ -474,16 +475,21 @@ for ii=1:n_sim
     %(M_t*(x0(7:12) - xx(7:12,mpciter+1))/h + C_t*x0(7:12) + N_t);
     logger.tau(:,end+1) = Jb'*(M_t*(x_sim(7:12,ii+1) - x_sim(7:12,ii))/dt + C_t + N_t);
     
-    ep = yref(1:3) - x_sim(1:3,ii+1);
-    eo = yref(4:6) - x_sim(4:6,ii+1);
-    logger.e(:,end+1) = [norm(ep), norm(eo)]';
+%     ep = yref(1:3) - x_sim(1:3,ii+1);
+    ep = ref_log(1:3,1) - x_sim(1:3,ii+1);
+%     eo = yref(4:6) - x_sim(4:6,ii+1);
+    eo = ref_log(4:6,1) - x_sim(4:6,ii+1);
+    ev = ref_log(7:9,1) - x_sim(7:9,ii+1);
+    logger.e(:,end+1) = [norm(ep), norm(eo), norm(ev)]';
     
     for i = 1:7
-        h_torque(i).XData = 1:ii;
+        %h_torque(i).XData = 1:ii;
+        h_torque(i).XData = linspace(0,ii*dt,ii);
         h_torque(i).YData = logger.tau(i, 1:ii);
     end
     for i = 1:2
-        h_error(i).XData = 1:ii;
+        %h_error(i).XData = 1:ii;
+        h_error(i).XData = linspace(0,ii*dt,ii);
         h_error(i).YData = logger.e(i, 1:ii);
     end
     

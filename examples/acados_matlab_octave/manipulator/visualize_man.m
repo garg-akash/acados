@@ -1,7 +1,7 @@
 time = 0:dt:T;
-q_output = b(8:14,:);
-dq_output = b(15:21,:);
-tau_output = b(1:7,:);
+q_output = x_sim(8:14,:);
+dq_output = x_sim(15:21,:);
+tau_output = x_sim(1:7,:);
 %% Joint plots
 figure
 grid on

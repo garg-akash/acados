@@ -11,7 +11,9 @@ end
 addpath('./kinematics/')
 addpath('./kinematics/screw/screws/') %required for ad()
 addpath('./kinematics/screw/util/') %required for isequalf()
-
+addpath('/home/akash/Documents/PeterCorkeToolbox/common/')
+addpath('/home/akash/Documents/PeterCorkeToolbox/rtb/')
+addpath('/home/akash/Documents/PeterCorkeToolbox/smtb/')
 %% robot defination using Petercorke
 global d1 d3 d5 d7 use_tau_f LWR
 global robot
@@ -233,7 +235,7 @@ ocp_opts.opts_struct
 % create ocp
 ocp = acados_ocp(ocp_model, ocp_opts);
 ocp
-%ocp.generate_c_code
+ocp.generate_c_code
 
 %% acados sim model
 sim_model = acados_sim_model();
@@ -350,9 +352,9 @@ for ii=1:n_sim
 	x_sim(:,ii+1) = sim.get('xn');
     u_sim(:,ii) = u0;
     
-    if (ii >= 100 && ii <= 150) % disturbance torque
-        x_sim(1:7,ii+1) = x_sim(1:7,ii+1) + Jb'*[20*sin((ii - 100)/50*pi);0; 0; 0; 0; 0];
-    end
+%     if (ii >= 100 && ii <= 150) % disturbance torque
+%         x_sim(1:7,ii+1) = x_sim(1:7,ii+1) + Jb'*[20*sin((ii - 100)/50*pi);0; 0; 0; 0; 0];
+%     end
     
     % update dynamic matrices
     Te = LWR.fkine(x_sim(8:14,ii+1)');

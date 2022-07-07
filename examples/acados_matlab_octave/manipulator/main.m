@@ -83,7 +83,7 @@ sim_sens_forw = 'false';
 sim_num_stages = 4;
 sim_num_steps = 1;
 % ocp
-ocp_N = 20;
+ocp_N = 10;
 % ocp_nlp_solver = 'sqp';
 ocp_nlp_solver = 'sqp_rti';
 ocp_qp_solver = 'partial_condensing_hpipm';
