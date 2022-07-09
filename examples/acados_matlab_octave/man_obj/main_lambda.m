@@ -64,26 +64,26 @@ load_init_params
 o.reset();
 
 disp('Calculating inverse kinematics')
-load refData.mat
-% q_ref = [];
-% dq_ref = [];
-% % q_new = q_initial;
-% q_new = deg2rad([-45;-30;0;60;0;90;0]);
-% for i = 1:size(p_ref,1)
-%     R_wb = rotz(o_wb(i,1))*roty(o_wb(i,2))*rotx(o_wb(i,3));
-%     T_wb = [R_wb,p_ref(i,:)';0 0 0 1];
-%     T_we = T_wb/T_eb;
-%     
-% %     Je_current = computeJe(d3,d5,d7,q_new_);
-% %     dq_new_ = Je_current\[pd_ref(i,:)';w_ref(:,i)]; %%use full jacobain
-% %     q_new_ = q_new_ + dq_new_*dt;
-% %     q_log = [q_log q_new_];
-%     dq_new = pinv(LWR.jacob0(q_new))*[pd_ref(i,:)';w_ref(:,i)]; %(v,w) of ee are coming out to be same as that of obj
-%     q_new = LWR.ikcon(T_we,q_new);
-% 
-%     q_ref = [q_ref q_new'];
-%     dq_ref = [dq_ref dq_new];
-% end
+%load refData.mat
+q_ref = [];
+dq_ref = [];
+% q_new = q_initial;
+q_new = deg2rad([-45;-30;0;60;0;90;0]);
+for i = 1:size(p_ref,1)
+    R_wb = rotz(o_wb(i,1))*roty(o_wb(i,2))*rotx(o_wb(i,3));
+    T_wb = [R_wb,p_ref(i,:)';0 0 0 1];
+    T_we = T_wb/T_eb;
+    
+%     Je_current = computeJe(d3,d5,d7,q_new_);
+%     dq_new_ = Je_current\[pd_ref(i,:)';w_ref(:,i)]; %%use full jacobain
+%     q_new_ = q_new_ + dq_new_*dt;
+%     q_log = [q_log q_new_];
+    dq_new = pinv(LWR.jacob0(q_new))*[pd_ref(i,:)';w_ref(:,i)]; %(v,w) of ee are coming out to be same as that of obj
+    q_new = LWR.ikcon(T_we,q_new);
+
+    q_ref = [q_ref q_new'];
+    dq_ref = [dq_ref dq_new];
+end
 
 Fc_hat = blkdiag(o.contacts(1).x_hat_, o.contacts(2).x_hat_, o.contacts(3).x_hat_, o.contacts(4).x_hat_);
 R_eb = T_eb(1:3,1:3);
