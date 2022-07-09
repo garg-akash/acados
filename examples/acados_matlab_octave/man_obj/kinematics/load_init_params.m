@@ -27,7 +27,7 @@ o.reset()
 %plan trajectory in spatial frame 
 %planned traj is for object and not the EE (use inverse kin to get EE traj)
 dt = 0.01; %0.008;
-T = 2.5;
+T = 1.0;
 tSteps = 0:dt:T; % time vector in seconds
 [s, sd, sdd] = tpoly(0, 1, tSteps'); % curvilinear abscissa and time derivatives
 ty_eb = 0.075; 
@@ -52,11 +52,13 @@ q_initial = LWR.ikcon(T0_we)';
 % q_initial = [0;1.57;-1.57;-1.2;1.57;-1.57;0];
 T0_wb = T0_we*T_eb; %initial transf of body
 p0 = T0_wb(1:3,4); %initial pos of body wrt world
+o_wb0 = rotm2eul(T0_wb(1:3,1:3));
 
 T1_we = [rotz(oee1(1))*roty(oee1(2))*rotx(oee1(3)),pee1;0 0 0 1]; %final transf of ee
 % q_final = LWR.ikcon(T1_we)';
 T1_wb = T1_we*T_eb;
 p1 = T1_wb(1:3,4); 
+o_wb1 = rotm2eul(T1_wb(1:3,1:3));
 od(1,1:3) = [0 0 0]; w_des(1:3,1) = [0 0 0];
 
 for i = 1 : size(tSteps,2)
@@ -64,6 +66,7 @@ for i = 1 : size(tSteps,2)
     pd(i, 1:3) = (sd(i)*(p1-p0))';
     pdd(i, 1:3) = (sdd(i)*(p1-p0))';
     
+%     peed(i, 1:3) = (sd(i)*(pee1-pee0))';
     
 %     a = -pdd(i, 1:3)' -[0;0;9.81];
 %     angle = acos(a'*[0;0;-1]/norm(a));
@@ -74,8 +77,8 @@ for i = 1 : size(tSteps,2)
 %     else
 %         w_des(1:3,i) = [0;0;0];
 %     end
-    o_wb(i,1:3) = (oee0 + s(i)*(oee1-oee0))';
-    od(i,1:3) = sd(i)*(oee1-oee0);
+    o_wb(i,1:3) = (o_wb0 + s(i)*(o_wb1-o_wb0))';
+    od(i,1:3) = sd(i)*(o_wb1-o_wb0);
     w_des(1:3,i) = zyx2E(o_wb(i,:))*od(i,:)';
 end
 %% circular trajectory 

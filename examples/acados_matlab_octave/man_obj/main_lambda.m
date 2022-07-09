@@ -23,7 +23,7 @@ d5=0.39;    % distance from fourth joint frame to sixth joint frame
 d7=0.078;
 use_tau_f=false;
 
-dq_init(:,1) = zeros(6,1);
+% dq_init(:,1) = zeros(6,1);
 
 clear L
 L(1) = Revolute('d', 0, 'a', 0, 'alpha', pi/2, ...
@@ -64,26 +64,26 @@ load_init_params
 o.reset();
 
 disp('Calculating inverse kinematics')
-%load ref.mat
-q_ref = [];
-dq_ref = [];
-% q_new = q_initial;
-q_new = deg2rad([-45;-30;0;60;0;90;0]);
-for i = 1:size(p_ref,1)
-    R_wb = rotz(o_wb(i,1))*roty(o_wb(i,2))*rotx(o_wb(i,3));
-    T_wb = [R_wb,p_ref(i,:)';0 0 0 1];
-    T_we = T_wb/T_eb;
-    
-%     Je_current = computeJe(d3,d5,d7,q_new_);
-%     dq_new_ = Je_current\[pd_ref(i,:)';w_ref(:,i)]; %%use full jacobain
-%     q_new_ = q_new_ + dq_new_*dt;
-%     q_log = [q_log q_new_];
-    dq_new = pinv(LWR.jacob0(q_new))*[pd_ref(i,:)';w_ref(:,i)];
-    q_new = LWR.ikcon(T_we,q_new);
-
-    q_ref = [q_ref q_new'];
-    dq_ref = [dq_ref dq_new];
-end
+load refData.mat
+% q_ref = [];
+% dq_ref = [];
+% % q_new = q_initial;
+% q_new = deg2rad([-45;-30;0;60;0;90;0]);
+% for i = 1:size(p_ref,1)
+%     R_wb = rotz(o_wb(i,1))*roty(o_wb(i,2))*rotx(o_wb(i,3));
+%     T_wb = [R_wb,p_ref(i,:)';0 0 0 1];
+%     T_we = T_wb/T_eb;
+%     
+% %     Je_current = computeJe(d3,d5,d7,q_new_);
+% %     dq_new_ = Je_current\[pd_ref(i,:)';w_ref(:,i)]; %%use full jacobain
+% %     q_new_ = q_new_ + dq_new_*dt;
+% %     q_log = [q_log q_new_];
+%     dq_new = pinv(LWR.jacob0(q_new))*[pd_ref(i,:)';w_ref(:,i)]; %(v,w) of ee are coming out to be same as that of obj
+%     q_new = LWR.ikcon(T_we,q_new);
+% 
+%     q_ref = [q_ref q_new'];
+%     dq_ref = [dq_ref dq_new];
+% end
 
 Fc_hat = blkdiag(o.contacts(1).x_hat_, o.contacts(2).x_hat_, o.contacts(3).x_hat_, o.contacts(4).x_hat_);
 R_eb = T_eb(1:3,1:3);
@@ -134,7 +134,7 @@ ocp_sim_method_num_steps = 1;
 ocp_cost_type = 'linear_ls';
 %ocp_cost_type = 'nonlinear_ls';
 %ocp_cost_type = 'ext_cost';
-ocp_levenberg_marquardt = 1e-2;
+ocp_levenberg_marquardt = 0;%1e-2;
 
 %% setup problem
 LAMBDA_CONST = 1;
@@ -172,7 +172,7 @@ lbx = [-176;-176;-110;-110;-110;-40;-40;...
         deg2rad(-120);deg2rad(-170);deg2rad(-120);deg2rad(-170);...
         deg2rad(-98);deg2rad(-98);deg2rad(-100); ...
         deg2rad(-98);deg2rad(-140);deg2rad(-180);deg2rad(-180);
-        1e-3*ones(16,1)];
+        1e-10*ones(16,1)];
 ubx = -lbx;
 ubx(22:37) = 2;
 
@@ -272,7 +272,7 @@ sim
 
 %% closed loop simulation
 
-n_sim = floor(1.5*T/dt);
+n_sim = floor(2*T/dt);
 x_sim = zeros(nx, n_sim+1);
 x_sim(:,1) = x0;
 u_sim = zeros(nu, n_sim);
@@ -374,14 +374,15 @@ for ii=1:n_sim
     
     M_tilde = M_m + Jb'*o.Mb*Jb;
     M_tilde_inv = inv(M_tilde);
-    C_tilde = C_m + Jb'*o.Mb*Jb_dot + Jb'*C_o*Jb;
+%     C_tilde = C_m + Jb'*o.Mb*Jb_dot + Jb'*C_o*Jb; %(wrong...adding vector and matrix)
+    C_tilde = C_m;
     N_tilde = N_m + Jb'*o.Nb;
     
 %     lambda_log = [lambda_log pinv(o.G*Fc_hat)*(o.Mb*(Jb*(x_sim(15:21,ii+1)-...
 %         x_sim(15:21,ii))/dt) + o.Nb)];
 
     %ddq = pinv(M_m)*(x_sim(1:7,ii) - Jb'*Fb_read - C_m - N_m);
-    ddq = M_tilde_inv*(x_sim(1:7,ii+1) - C_tilde*x_sim(15:21,ii+1) - N_tilde);
+    ddq = M_tilde_inv*(x_sim(1:7,ii+1) - C_tilde - N_tilde);
     ddx = Jb*ddq + Jb_dot*x_sim(15:21,ii+1);
     Fb_read = o.Mb*ddx + o.Nb;
     Fc_read = pinv(o.G)*Fb_read;
