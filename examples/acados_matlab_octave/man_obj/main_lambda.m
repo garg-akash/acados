@@ -64,7 +64,7 @@ load_init_params
 o.reset();
 
 disp('Calculating inverse kinematics')
-%load refData.mat
+% load 15refData.mat
 q_ref = [];
 dq_ref = [];
 % q_new = q_initial;
@@ -123,7 +123,7 @@ sim_num_steps = 1;
 % ocp
 ocp_N = 10;
 ocp_nlp_solver = 'sqp_rti';
-%ocp_nlp_solver = 'sqp_rti';
+% ocp_nlp_solver = 'sqp';
 ocp_qp_solver = 'partial_condensing_hpipm';
 %ocp_qp_solver = 'full_condensing_hpipm';
 ocp_qp_solver_cond_N = 5;
@@ -134,10 +134,9 @@ ocp_sim_method_num_steps = 1;
 ocp_cost_type = 'linear_ls';
 %ocp_cost_type = 'nonlinear_ls';
 %ocp_cost_type = 'ext_cost';
-ocp_levenberg_marquardt = 0;%1e-2;
+ocp_levenberg_marquardt = 1e-3;
 
 %% setup problem
-LAMBDA_CONST = 1;
 % manipulator mpc 
 model = manipulator_object_model_lambda(o.G);
 % dims
@@ -172,13 +171,14 @@ lbx = [-176;-176;-110;-110;-110;-40;-40;...
         deg2rad(-120);deg2rad(-170);deg2rad(-120);deg2rad(-170);...
         deg2rad(-98);deg2rad(-98);deg2rad(-100); ...
         deg2rad(-98);deg2rad(-140);deg2rad(-180);deg2rad(-180);
-        1e-10*ones(16,1)];
+        1e-3*ones(16,1)];
+%         -2*ones(16,1)]; %in case of no lambda constraint
 ubx = -lbx;
 ubx(22:37) = 2;
 
 Jbu = zeros(nbu, nu); for ii=1:nbu Jbu(ii,ii)=1.0; end
-lbu = -1000*ones(nu, 1);
-ubu = 1000*ones(nu, 1);
+lbu = -200*ones(nu, 1); %1000 in case of no tau_dot constraint
+ubu = 200*ones(nu, 1);
 
 %% acados ocp model
 ocp_model = acados_ocp_model();
@@ -227,7 +227,8 @@ ocp_opts.set('sim_method', ocp_sim_method);
 ocp_opts.set('sim_method_num_stages', ocp_sim_method_num_stages);
 ocp_opts.set('sim_method_num_steps', ocp_sim_method_num_steps);
 ocp_opts.set('regularize_method', 'convexify');
-%ocp_opts.set('qp_solver_warm_start', 0);
+% ocp_opts.set('qp_solver_warm_start', 1);
+% ocp_opts.set('print_level', 0);
 
 ocp_opts.opts_struct
 
@@ -411,105 +412,105 @@ end
 avg_time_solve = toc/n_sim
 
 %% PLOTS
-% p  
-figure
-for i = 1:3
-subplot(3,1,i)
-plot(p_log(i,:),'-','linewidth',2)
-grid on
-hold on
-plot(p(:,i)','--','linewidth',2)
-yl = strcat('$p_{', strcat(int2str(i), '}$'));
-xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
-set(gca, 'FontSize', 10)
-end
-
-% phi 
-figure
-for i = 1:3
-subplot(3,1,i)
-plot(phi_log(4-i,:),'-','linewidth',2)
-grid on
-hold on
-plot(o_wb(:,i)','--','linewidth',2)
-yl = strcat('$\phi_{', strcat(int2str(i), '}$'));
-xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
-set(gca, 'FontSize', 10)
-end
-        
-% dq  
-figure
-for i = 1:7
-subplot(3,3,i)
-plot(dq_log(i,:),'-','linewidth',2)
-grid on
-hold on
-plot(dq_ref(i,1:size(dq_ref,2)),'--','linewidth',2)
-plot(repmat(lbx(14+i),size(dq_log,2)),'--r','linewidth',2) 
-plot(repmat(ubx(14+i),size(dq_log,2)),'--r','linewidth',2)
-yl = strcat('$\dot{q}_', strcat(int2str(i), '$'));
-xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
-set(gca, 'FontSize', 10)
-end
-        
-% q  
-figure
-for i = 1:7
-subplot(3,3,i)
-plot(q_log(i,:),'-','linewidth',2)
-grid on
-hold on
-plot(q_ref(i,1:size(q_ref,2)),'--','linewidth',2)
-plot(repmat(lbx(7+i),size(q_log,2)),'--r','linewidth',2) 
-plot(repmat(ubx(7+i),size(q_log,2)),'--r','linewidth',2)
-yl = strcat('$q_', strcat(int2str(i), '$'));
-xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
-set(gca, 'FontSize', 10)
-end
-
-% tau  
-figure
-for i = 1:7
-subplot(3,3,i)
-plot(tau_log(i,:),'-','linewidth',2)
-grid on
-hold on 
-plot(repmat(lbx(i),size(tau_log,2)),'--r','linewidth',2) 
-plot(repmat(ubx(i),size(tau_log,2)),'--r','linewidth',2)
-yl = strcat('$\tau_', strcat(int2str(i), '$'));
-xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
-set(gca, 'FontSize', 10)
-end
-
-% dtau
-figure
-for i = 1:7
-subplot(3,3,i)
-plot(dtau_log(i,:),'-','linewidth',2)
-grid on
-hold on 
-plot(repmat(lbu(i),size(dtau_log,2)),'--r','linewidth',2) 
-plot(repmat(ubu(i),size(dtau_log,2)),'--r','linewidth',2)
-yl = strcat('$\dot{\tau}_', strcat(int2str(i), '$'));
-xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
-set(gca, 'FontSize', 10)
-end   
-
-% lambda
-figure
-for i = 1:16
-subplot(4,4,i)
-plot(lambda_log(i,:),'-','linewidth',2)
-grid on
-hold on
-plot(repmat(lbx(21+i),size(lambda_log,2)),'--r','linewidth',2) 
-plot(repmat(ubx(21+i),size(lambda_log,2)),'--r','linewidth',2)
-yl = strcat('$\lambda_{', strcat(int2str(i), '}$'));
-xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
-set(gca, 'FontSize', 10)
-end
-
-save('data_dist.mat', 'p_log', 'phi_log', 'lambda_log', 'dq_log', 'q_log', 'tau_log', 'dtau_log', 'cost_val_ocp', 'q_ref', 'dq_ref', 'p', 'o_wb', 'lbx', 'ubx', 'lbu', 'ubu')
+% % p  
+% figure
+% for i = 1:3
+% subplot(3,1,i)
+% plot(p_log(i,:),'-','linewidth',2)
+% grid on
+% hold on
+% plot(p(:,i)','--','linewidth',2)
+% yl = strcat('$p_{', strcat(int2str(i), '}$'));
+% xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
+% set(gca, 'FontSize', 10)
+% end
+% 
+% % phi 
+% figure
+% for i = 1:3
+% subplot(3,1,i)
+% plot(phi_log(4-i,:),'-','linewidth',2)
+% grid on
+% hold on
+% plot(o_wb(:,i)','--','linewidth',2)
+% yl = strcat('$\phi_{', strcat(int2str(i), '}$'));
+% xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
+% set(gca, 'FontSize', 10)
+% end
+%         
+% % dq  
+% figure
+% for i = 1:7
+% subplot(3,3,i)
+% plot(dq_log(i,:),'-','linewidth',2)
+% grid on
+% hold on
+% plot(dq_ref(i,1:size(dq_ref,2)),'--','linewidth',2)
+% plot(repmat(lbx(14+i),size(dq_log,2)),'--r','linewidth',2) 
+% plot(repmat(ubx(14+i),size(dq_log,2)),'--r','linewidth',2)
+% yl = strcat('$\dot{q}_', strcat(int2str(i), '$'));
+% xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
+% set(gca, 'FontSize', 10)
+% end
+%         
+% % q  
+% figure
+% for i = 1:7
+% subplot(3,3,i)
+% plot(q_log(i,:),'-','linewidth',2)
+% grid on
+% hold on
+% plot(q_ref(i,1:size(q_ref,2)),'--','linewidth',2)
+% plot(repmat(lbx(7+i),size(q_log,2)),'--r','linewidth',2) 
+% plot(repmat(ubx(7+i),size(q_log,2)),'--r','linewidth',2)
+% yl = strcat('$q_', strcat(int2str(i), '$'));
+% xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
+% set(gca, 'FontSize', 10)
+% end
+% 
+% % tau  
+% figure
+% for i = 1:7
+% subplot(3,3,i)
+% plot(tau_log(i,:),'-','linewidth',2)
+% grid on
+% hold on 
+% plot(repmat(lbx(i),size(tau_log,2)),'--r','linewidth',2) 
+% plot(repmat(ubx(i),size(tau_log,2)),'--r','linewidth',2)
+% yl = strcat('$\tau_', strcat(int2str(i), '$'));
+% xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
+% set(gca, 'FontSize', 10)
+% end
+% 
+% % dtau
+% figure
+% for i = 1:7
+% subplot(3,3,i)
+% plot(dtau_log(i,:),'-','linewidth',2)
+% grid on
+% hold on 
+% plot(repmat(lbu(i),size(dtau_log,2)),'--r','linewidth',2) 
+% plot(repmat(ubu(i),size(dtau_log,2)),'--r','linewidth',2)
+% yl = strcat('$\dot{\tau}_', strcat(int2str(i), '$'));
+% xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
+% set(gca, 'FontSize', 10)
+% end   
+% 
+% % lambda
+% figure
+% for i = 1:16
+% subplot(4,4,i)
+% plot(lambda_log(i,:),'-','linewidth',2)
+% grid on
+% hold on
+% plot(repmat(lbx(21+i),size(lambda_log,2)),'--r','linewidth',2) 
+% plot(repmat(ubx(21+i),size(lambda_log,2)),'--r','linewidth',2)
+% yl = strcat('$\lambda_{', strcat(int2str(i), '}$'));
+% xlabel('iteration','Interpreter','latex');ylabel(yl,'Interpreter','latex')
+% set(gca, 'FontSize', 10)
+% end
+% 
+% save('data_dist.mat', 'p_log', 'phi_log', 'lambda_log', 'dq_log', 'q_log', 'tau_log', 'dtau_log', 'cost_val_ocp', 'q_ref', 'dq_ref', 'p', 'o_wb', 'lbx', 'ubx', 'lbu', 'ubu')
 
 
 %% function definition

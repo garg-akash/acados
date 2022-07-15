@@ -27,7 +27,7 @@ o.reset()
 %plan trajectory in spatial frame 
 %planned traj is for object and not the EE (use inverse kin to get EE traj)
 dt = 0.01; %0.008;
-T = 1.0;
+T = 1.5;
 tSteps = 0:dt:T; % time vector in seconds
 [s, sd, sdd] = tpoly(0, 1, tSteps'); % curvilinear abscissa and time derivatives
 ty_eb = 0.075; 
