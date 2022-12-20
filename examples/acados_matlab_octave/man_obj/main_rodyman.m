@@ -4,7 +4,7 @@ close all
 
 load_rodyman_dynamic_params;
 
-USE_COPPELIA = 0;
+USE_COPPELIA = 1;
 
 if(USE_COPPELIA)
     coppelia = remApi('remoteApi');
@@ -102,7 +102,7 @@ if(~USE_COPPELIA)
 end
 
 %% Object
-mu = 0.2; %0.5;%0.75; % for cube in lab 0.25
+mu = 0.20; %0.5;%0.75; % for cube in lab 0.25
 obj_len = 0.06; % for cube in lab 0.06
 obj_wd = 0.06; % for cube in lab 0.06
 obj_ht = 0.07; % for cube in lab 0.07
@@ -117,7 +117,7 @@ c1 = contact(h1, 'pcwf', mu);
 
 % object params
 m = 0.236; %0.5; % for cube in lab 0.236;
-I = 4.5375*1e-5*eye(3); %1e-4*eye(3); %for cube in lab 4.5375*1e-5*eye(3);
+I = 4.5375*1e-4*eye(3); %1e-4*eye(3); %for cube in lab 4.5375*1e-5*eye(3);
 
 % create rigid body
 o = rigidBody(m, I);
@@ -128,43 +128,48 @@ Fc_hat = blkdiag(o.contacts(1).x_hat_, o.contacts(2).x_hat_, o.contacts(3).x_hat
 
 %% Trajectory
 disp('Planning the trajectory...')
-%plan_trajectory
-dt = 0.005; % 0.01;
-T = 1.5;
-tSteps = 0:dt:T; % time vector in seconds
-[s, sd, sdd] = tpoly(0, 1, tSteps'); % curvilinear abscissa and time derivatives
+
 ty_eb = 0.075;
 tz_eb = 0.07 + 0.0275;
 R_eb = eye(3); % rotation of body frame wrt ee
 T_eb = [R_eb,[0;ty_eb;tz_eb];0 0 0 1];
 Ad_eb = [[R_eb,skew(T_eb(1:3,4))*R_eb];[zeros(3),R_eb]];
 
-% ee linear trajectory (position)
-pee0 = T0_we.t;
-pee1 = T0_we.t+[0,0.65,0]';
-eul = rotm2eul(T0_we.R,'ZYX')';
-oee0 = eul; %initial euler zyx of ee wrt world
-oee1 = eul; % euler zyx final
+eight_shaped_traj;
+%%%%%%%%%%%%%%%%
+%plan_trajectory
+% dt = 0.008; % 0.01;
+% T = 2.5;
+% tSteps = 0:dt:T; % time vector in seconds
+% [s, sd, sdd] = tpoly(0, 1, tSteps'); % curvilinear abscissa and time derivatives
 
-T0_we = [rotz(oee0(1))*roty(oee0(2))*rotx(oee0(3)), pee0; 0 0 0 1]; % initial transf of ee wrt world
-T0_wb = T0_we*T_eb; % initial transf of body wrt world
-p0 = T0_wb(1:3,4); % initial pos of body wrt world
-
-T1_we = [rotz(oee1(1))*roty(oee1(2))*rotx(oee1(3)), pee1;0 0 0 1]; %final transf of ee
-T1_wb = T1_we*T_eb;
-p1 = T1_wb(1:3,4);
-
-od(1,1:3) = [0 0 0]; w_des(1:3,1) = [0 0 0];
-
-for i = 1 : size(tSteps,2)
-    p_ref(i, 1:3) = (p0 + s(i)*(p1-p0))';
-    pd_ref(i, 1:3) = (sd(i)*(p1-p0))';
-    pdd_ref(i, 1:3) = (sdd(i)*(p1-p0))';
-    
-    o_ref(i,1:3) = (oee0 + s(i)*(oee1-oee0))';
-    od(i,1:3) = sd(i)*(oee1-oee0);
-    w_ref(1:3,i) = zyx2E(o_ref(i,:))*od(i,:)';
-end
+% % ee linear trajectory (position)
+% pee0 = T0_we.t;
+% pee1 = T0_we.t+[0,0.62,0]';
+% eul = rotm2eul(T0_we.R,'ZYX')';
+% oee0 = eul; %initial euler zyx of ee wrt world
+% oee1 = eul; % euler zyx final
+% 
+% T0_we = [rotz(oee0(1))*roty(oee0(2))*rotx(oee0(3)), pee0; 0 0 0 1]; % initial transf of ee wrt world
+% T0_wb = T0_we*T_eb; % initial transf of body wrt world
+% p0 = T0_wb(1:3,4); % initial pos of body wrt world
+% 
+% T1_we = [rotz(oee1(1))*roty(oee1(2))*rotx(oee1(3)), pee1;0 0 0 1]; %final transf of ee
+% T1_wb = T1_we*T_eb;
+% p1 = T1_wb(1:3,4);
+% 
+% od(1,1:3) = [0 0 0]; w_des(1:3,1) = [0 0 0];
+% 
+% for i = 1 : size(tSteps,2)
+%     p_ref(i, 1:3) = (p0 + s(i)*(p1-p0))';
+%     pd_ref(i, 1:3) = (sd(i)*(p1-p0))';
+%     pdd_ref(i, 1:3) = (sdd(i)*(p1-p0))';
+%     
+%     o_ref(i,1:3) = (oee0 + s(i)*(oee1-oee0))';
+%     od(i,1:3) = sd(i)*(oee1-oee0);
+%     w_ref(1:3,i) = zyx2E(o_ref(i,:))*od(i,:)';
+% end
+%%%%%%%%%%%%%%%%
 
 disp('Calculating inverse kinematics...')
 q_ref = [];
@@ -241,7 +246,7 @@ ocp_sim_method_num_steps = 1;
 ocp_cost_type = 'linear_ls';
 %ocp_cost_type = 'nonlinear_ls';
 %ocp_cost_type = 'ext_cost';
-ocp_levenberg_marquardt = 10e0;
+ocp_levenberg_marquardt = 1e-1;
 
 %% setup problem
 LAMBDA_CONST = 1;
@@ -261,13 +266,13 @@ Vx = zeros(ny, nx); for ii=1:nx Vx(ii,ii)=1.0; end % state-to-output matrix in l
 Vu = zeros(ny, nu); for ii=1:nu Vu(nx+ii,ii)=1.0; end % input-to-output matrix in lagrange term
 Vx_e = zeros(ny_e, nx); for ii=1:nx Vx_e(ii,ii)=1.0; end % state-to-output matrix in mayer term
 Q = blkdiag(1e-4*eye(9), 1e7*eye(9), 1e5*eye(9), 1e-3*eye(16));
-R = 5e-3*eye(nu);
+R = 5e-4*eye(nu);
 % Q = blkdiag(1e-8,1e-8,1e-6,1e-6,1e-6*eye(3),...
 %     1e-2,1e-2,1e0,1e0,1e0*eye(3),...
 %     1e-5,1e-5,1e-3,1e-3,1e-3*eye(3));
 % R = 1e-8*eye(nu);
 W = blkdiag(Q, R); % weight matrix in lagrange term
-W_e = 1e-1*Q; % weight matrix in mayer term
+W_e = 1e-2*Q; % weight matrix in mayer term
 yref = zeros(ny, 1); % output reference in lagrange term
 yref_e = zeros(ny_e, 1); % output reference in mayer term
 % constraints
@@ -497,7 +502,7 @@ for ii=1:n_sim
     %         x_sim(19:27,ii))/dt) + o.Nb)];
     
     %ddq = pinv(M_m)*(x_sim(1:7,ii) - Jb'*Fb_read - C_m - N_m);
-    ddq = M_tilde_inv*(x_sim(1:9,ii+1) - C_tilde*x_sim(19:27,ii+1) - N_tilde);
+    ddq = pinv(M_tilde)*(x_sim(1:9,ii+1) - C_tilde*x_sim(19:27,ii+1) - N_tilde);
     ddx = Jb*ddq + Jb_dot*x_sim(19:27,ii+1);
     Fb_read = o.Mb*ddx + o.Nb;
     Fc_read = pinv(o.G)*Fb_read;
@@ -548,7 +553,7 @@ if(USE_COPPELIA)
                 fprintf('failed to set the position of joint %d \n',i);
             end
         end
-        pause(0.005);
+        pause(0.008);
     end
 end
 
@@ -623,7 +628,7 @@ end
 q_log_f = q_log;
 for i = 2 : size(q_log,2)
     for j = 1 : size(q_log,1)
-        q_log_f(j,i) = 0.01*q_log_f(j,i) + 0.99*q_log_f(j,i-1);
+        q_log_f(j,i) = 0.1*q_log_f(j,i) + 0.90*q_log_f(j,i-1);
     end
 end
 
@@ -686,7 +691,7 @@ end
 
 if(~USE_COPPELIA)
     figure(1)
-    Rodyman.plot(toRodyman(q_log)')
+    %Rodyman.plot(toRodyman(q_log)')
 end
 
 save(strcat(strcat('data_rodyman_',datestr(t),'.mat')), 'p_log', 'phi_log', 'lambda_log', 'dq_log', 'q_log', 'tau_log', 'dtau_log', 'cost_val_ocp', 'q_ref', 'dq_ref', 'p_ref', 'o_ref', 'lbx', 'ubx', 'lbu', 'ubu')

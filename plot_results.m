@@ -1,3 +1,6 @@
+dt = 0.008;
+t = 0:dt:size(Fc,1)*dt;
+
 %% Position plots
 figure
 grid on
