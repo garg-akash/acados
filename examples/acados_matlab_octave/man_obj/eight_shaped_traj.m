@@ -23,9 +23,12 @@ A = [diff(V, 1, 2)/dt, [0,0,0]'];                                   % trajectory
 P = P + pee0 + [0;0.3;0];
 p_ref = P';
 pd_ref = V';
+pdd_ref = A';
 
 for i = 1 : size(P,2)
     o_ref(i,1:3) = oee0;
     od(i,1:3) = [0,0,0];
     w_ref(1:3,i) = zyxE(o_ref(i,:))*od(i,:)';
 end
+
+save('reference_8_traj_55s.mat', 'o_ref', 'od', 'p_ref', 'pd_ref', 'pdd_ref', 'w_ref')

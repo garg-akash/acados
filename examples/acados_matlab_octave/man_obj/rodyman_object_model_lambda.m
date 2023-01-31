@@ -1,9 +1,9 @@
-function [model] = rodyman_object_model_lambda(G)
+function [model] = rodyman_object_model_lambda(G, Fc_hat)
 
 import casadi.*
 
 % system dimensions
-nx = 27 + 16;           % state models parameter (tau, qdot, q, lambda)
+nx = 27 + 16;           % state models parameter (tau, q, q_dot, lambda)
 nu = 9;                 % state noise on parameter
 np = 391;               % parameters
 
@@ -27,24 +27,26 @@ Cm = reshape(p(367:375),9,1);
 Nm = reshape(p(376:384),9,1);
 Fb = reshape(p(385:390),6,1);
 
-mu = p(391);
-theta_ = atan(mu);
-z_hat_ = [0,0,1]';
-Rx = [1 0 0; 0 cos(theta_) -sin(theta_); 0 sin(theta_) cos(theta_)];
-Rx_ = [1 0 0; 0 cos(-theta_) -sin(-theta_); 0 sin(-theta_) cos(-theta_)];
-Ry = [cos(theta_) 0 sin(theta_); 0 1 0; -sin(theta_) 0 cos(theta_)];
-Ry_ = [cos(-theta_) 0 sin(-theta_); 0 1 0; -sin(-theta_) 0 cos(-theta_)];
-x_hat_ = [Rx*z_hat_, ...
-        Rx_*z_hat_, ...
-        Ry*z_hat_, ...
-        Ry_*z_hat_];
-Fc_hat = blkdiag(x_hat_, x_hat_, x_hat_, x_hat_);
+% mu = p(391);
+% theta_ = atan(mu);
+% z_hat_ = [0,0,1]';
+% Rx = [1 0 0; 0 cos(theta_) -sin(theta_); 0 sin(theta_) cos(theta_)];
+% Rx_ = [1 0 0; 0 cos(-theta_) -sin(-theta_); 0 sin(-theta_) cos(-theta_)];
+% Ry = [cos(theta_) 0 sin(theta_); 0 1 0; -sin(theta_) 0 cos(theta_)];
+% Ry_ = [cos(-theta_) 0 sin(-theta_); 0 1 0; -sin(-theta_) 0 cos(-theta_)];
+% x_hat_ = [Rx*z_hat_, ...
+%         Rx_*z_hat_, ...
+%         Ry*z_hat_, ...
+%         Ry_*z_hat_];
+% Fc_hat = blkdiag(x_hat_, x_hat_, x_hat_, x_hat_);
 
 x_dot_expr = [controls ; ...
               states(19:27) ; ... 
               Mt\(- Ct - Nt + states(1:9)); ...
-              pinv(G*Fc_hat)*(Mo*(Jdot_*pinv(Mt)*(states(1:9) - Ct - Nt) + ...
-              J_*pinv(Mt)*controls) + Jdot_*states(19:27))];
+              %pinv(G*Fc_hat)*(Mo*(Jdot_*pinv(Mt)*(states(1:9) - Ct - Nt) + ...
+              %J_*pinv(Mt)*controls) + Jdot_*states(19:27))];
+              pinv(G*Fc_hat)*(2*Mo*(Jdot_*pinv(Mt)*(states(1:9) - Ct - Nt) + ...
+              J_*pinv(Mt)*controls))];
 
 % store eveything in model struct
 model = struct();

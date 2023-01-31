@@ -16,6 +16,7 @@ classdef rigidBody < matlab.mixin.Copyable
         a = [];             % body acceleration
         Fb = [];            % body wrench
         Fc_hat = [];        % composite friction cone versor
+        mu = 1;             % friction coeff
     end
     
     methods
@@ -88,6 +89,10 @@ classdef rigidBody < matlab.mixin.Copyable
                     obj.contacts(i).n_hat_ = nhat;
                 end
             end
+        end
+        
+        function setMu(obj, mu)
+            obj.mu = mu;
         end
         
         [Fb_, Fc_, lambda_, flag_] = computeReactionForces(obj, Fb);
