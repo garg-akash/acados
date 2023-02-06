@@ -6,12 +6,12 @@ oee0 = eul; %initial euler zyx of ee wrt world
 %%%%%
 %% TRAJECTORY
 dt = 0.008;
-T = 5.5;
+T = 4.5;
 time = linspace(0, T, T/dt);
 
 k = 4;                                                              % spline order
 t = [0 0.2 0.4 0.6 0.8 1 1.2 1.4 1.6 1.8 2 2.2 2.4 2.6 2.8 3 3.2];  % knot sequence
-P = 1*[0 0.0 0.0 0.2 0.4  0.2 0 -0.2 -0.4 -0.2 0 0 0;
+P = 0.35*[0 0.0 0.0 0.2 0.4  0.2 0 -0.2 -0.4 -0.2 0 0 0;
     0 0.0 0.0 0.2 0.0 -0.2 0 0.2 0 -0.2 0 0 0];                     % control points
 
 traj = trajectory(k, t, P, size(time,2));                           % plan b-spline trajectory
@@ -20,7 +20,7 @@ P = roty(1.57)*rotz(1.57)*P;
 V = [diff(P, 1, 2)/dt, [0,0,0]'];                                   % trajectory velocity
 A = [diff(V, 1, 2)/dt, [0,0,0]'];                                   % trajectory acceleration
 
-P = P + pee0 + [0;0.3;0];
+P = P + pee0 + [0;0.2;0];
 p_ref = P';
 pd_ref = V';
 pdd_ref = A';

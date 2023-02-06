@@ -5,12 +5,14 @@ close all
 addpath(genpath('/home/mrslvgg/work/repo/waiter-robot-mpc/Software/simulation/matlab'))
 addpath(genpath('./kinematics'))
 
-GENERATE_TRAJECTORY = 0;
-GENERATE_OBJECT = 1;
+GENERATE_TRAJECTORY = 1;
+TRAJ = "square"; % "8", "linear"
+DURATION = "60";
+GENERATE_OBJECT = 0;
 
 dt = 0.008;
 
-USE_COPPELIA = 1;
+USE_COPPELIA = 0;
 PLOTS = 0;
 
 if(USE_COPPELIA)
@@ -77,32 +79,72 @@ if(GENERATE_TRAJECTORY)
     Rodyman = SerialLink(L, 'name', 'Rodyman');
     
     % set limits
-    Rodyman.qlim(1,1) = -170*pi/180;
-    Rodyman.qlim(1,2) = 170*pi/180;
-    Rodyman.qlim(2,1) = -120*pi/180;
-    Rodyman.qlim(2,2) = 120*pi/180;
+%     Rodyman.qlim(1,1) = -170*pi/180;
+%     Rodyman.qlim(1,2) = 170*pi/180;
+%     Rodyman.qlim(2,1) = -120*pi/180;
+%     Rodyman.qlim(2,2) = 120*pi/180;
+%     Rodyman.qlim(3,1) = 0; % fixed
+%     Rodyman.qlim(3,2) = 0;
+%     Rodyman.qlim(4,1) = -120*pi/180;
+%     Rodyman.qlim(4,2) = 120*pi/180;
+%     Rodyman.qlim(5,1) = -170*pi/180;
+%     Rodyman.qlim(5,2) = 170*pi/180;
+%     Rodyman.qlim(6,1) = -120*pi/180;
+%     Rodyman.qlim(6,2) = 120*pi/180;
+%     Rodyman.qlim(7,1) = -170*pi/180;
+%     Rodyman.qlim(7,2) = 170*pi/180;
+%     Rodyman.qlim(8,1) = -170*pi/180;
+%     Rodyman.qlim(8,2) = 170*pi/180;
+%     Rodyman.qlim(9,1) = -170*pi/180;
+%     Rodyman.qlim(9,2) = 170*pi/180;
+%     Rodyman.qlim(10,1) = -170*pi/180;
+%     Rodyman.qlim(10,2) = 170*pi/180;
+
+    Rodyman.qlim(1,1) = -pi;
+    Rodyman.qlim(1,2) = pi;
+    Rodyman.qlim(2,1) = -pi/6;
+    Rodyman.qlim(2,2) = pi/6;
     Rodyman.qlim(3,1) = 0; % fixed
     Rodyman.qlim(3,2) = 0;
-    Rodyman.qlim(4,1) = -120*pi/180;
-    Rodyman.qlim(4,2) = 120*pi/180;
-    Rodyman.qlim(5,1) = -170*pi/180;
-    Rodyman.qlim(5,2) = 170*pi/180;
-    Rodyman.qlim(6,1) = -120*pi/180;
-    Rodyman.qlim(6,2) = 120*pi/180;
-    Rodyman.qlim(7,1) = -170*pi/180;
-    Rodyman.qlim(7,2) = 170*pi/180;
-    Rodyman.qlim(8,1) = -170*pi/180;
-    Rodyman.qlim(8,2) = 170*pi/180;
-    Rodyman.qlim(9,1) = -170*pi/180;
-    Rodyman.qlim(9,2) = 170*pi/180;
-    Rodyman.qlim(10,1) = -170*pi/180;
-    Rodyman.qlim(10,2) = 170*pi/180;
+    Rodyman.qlim(4,1) = -pi/2;
+    Rodyman.qlim(4,2) = pi/2;
+    Rodyman.qlim(5,1) = 0;
+    Rodyman.qlim(5,2) = 2/3*pi;
+    Rodyman.qlim(6,1) = -pi/4;
+    Rodyman.qlim(6,2) = pi/4;
+    Rodyman.qlim(7,1) = -pi/3;
+    Rodyman.qlim(7,2) = pi/3;
+    Rodyman.qlim(8,1) = -pi;
+    Rodyman.qlim(8,2) = pi;
+    Rodyman.qlim(9,1) = -2/3*pi;
+    Rodyman.qlim(9,2) = 2/3*pi;
+    Rodyman.qlim(10,1) = -pi;
+    Rodyman.qlim(10,2) = pi;
+    
+    qdotlim(1,1) = -0.418;
+    qdotlim(1,2) = 0.418;
+    qdotlim(2,1) = -0.418;
+    qdotlim(2,2) = 0.418;
+    qdotlim(3,1) = -0.418;
+    qdotlim(3,2) = 0.418;
+    qdotlim(4,1) = -0.418;
+    qdotlim(4,2) = 0.418;
+    qdotlim(5,1) = -1.25;
+    qdotlim(5,2) = 1.25;
+    qdotlim(6,1) = -1.25;
+    qdotlim(6,2) = 1.25;
+    qdotlim(7,1) = -1.25;
+    qdotlim(7,2) = 1.25;
+    qdotlim(8,1) = -1.25;
+    qdotlim(8,2) = 1.25;
+    qdotlim(9,1) = -1.25;
+    qdotlim(9,2) = 1.25;
     
     % set initial configuration
     if(~USE_COPPELIA)
         Rodyman.plot(zeros(10,1)', 'scale', 0.5)
     end
-    Td_we = [[0 -1, 0; 1, 0, 0; 0, 0, 1], [0.7, -0.5, 1.34]'; 0 0 0 1];
+    Td_we = [[0 -1, 0; 1, 0, 0; 0, 0, 1], [0.5, -0.4, 1.30]'; 0 0 0 1];
     q_0 = [0.4177, 0.4658, 0, -1.2741, -0.4330, 2.0929, 0.6914, 0.4386, 1.6432, -1.1352]'; %% put init values
     q_0 = Rodyman.ikcon(Td_we,q_0);
     T0_we = Rodyman.fkine(q_0);
@@ -111,7 +153,7 @@ if(GENERATE_TRAJECTORY)
         Rodyman.plot(q_0);
     end
     
-    save('rodyman_robot.mat', 'Rodyman');
+    save('rodyman_robot.mat', 'Rodyman', 'qdotlim');
 else
     load('rodyman_robot.mat');
 end
@@ -145,9 +187,9 @@ Ad_eb = [[R_eb,zeros(3)];[skew(T_eb(1:3,4))*R_eb,R_eb]];
 if(GENERATE_TRAJECTORY)
     disp('Planning the trajectory...')
     
-    %eight_shaped_traj;
+    eight_shaped_traj;
     %square_via_points_traj;
-    linear_traj;
+    %linear_traj;
     
     %%%%%%%%%%%%%%%%
     %plan_trajectory
@@ -207,10 +249,10 @@ if(GENERATE_TRAJECTORY)
     fprintf(fileID,'%12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f\n', q_ref);
     fclose(fileID);
     
-    save('jnt_trajectory_linear.mat', 'q_ref', 'dq_ref', 'p_ref', 'o_ref', 'pd_ref', 'w_ref');
+    save('cart_jnt_8_45s_real.mat', 'q_ref', 'dq_ref', 'p_ref', 'o_ref', 'pd_ref', 'w_ref');
     
 else
-    load('jnt_trajectory_linear.mat')
+    load('cart_jnt_8_45s_real.mat')
     T = size(q_ref,2)*dt;
 end
 
@@ -276,7 +318,7 @@ ocp_cost_type = 'linear_ls';
 %ocp_cost_type = 'ext_cost';
 ocp_levenberg_marquardt = 1e-1;
 qp_solver_warm_start = 1;
-qp_solver_iter_max = 1000; % default is 50; OSQP needs a lot sometimes.
+qp_solver_iter_max = 10000; % default is 50; OSQP needs a lot sometimes.
 
 %% setup problem
 LAMBDA_CONST = 1;
@@ -295,14 +337,14 @@ nbu = model.nu; % number of input bounds
 Vx = zeros(model.nx+model.nu, model.nx); for ii=1:model.nx Vx(ii,ii)=1.0; end % state-to-output matrix in lagrange term
 Vu = zeros(model.nx+model.nu, model.nu); for ii=1:model.nu Vu(model.nx+ii,ii)=1.0; end % input-to-output matrix in lagrange term
 Vx_e = zeros(ny_e, model.nx); for ii=1:model.nx Vx_e(ii,ii)=1.0; end % state-to-output matrix in mayer term
-Q = blkdiag(0e-0*eye(9), 1e5*eye(9), 1e4*eye(9), 0e-0*eye(16));
+Q = blkdiag(1e-3*eye(9), 1e7*eye(9), 1e5*eye(9), 1e-3*eye(16));
 R = 1e-3*eye(model.nu);
 % Q = blkdiag(1e-8,1e-8,1e-6,1e-6,1e-6*eye(3),...
 %     1e-2,1e-2,1e0,1e0,1e0*eye(3),...
 %     1e-5,1e-5,1e-3,1e-3,1e-3*eye(3));
 % R = 1e-8*eye(nu);
 W = blkdiag(Q, R); % weight matrix in lagrange term
-W_e = 1e-3*Q; % weight matrix in mayer term
+W_e = 1e-1*Q; % weight matrix in mayer term
 yref = zeros(model.nx+model.nu, 1); % output reference in lagrange term
 yref_e = zeros(ny_e, 1); % output reference in mayer term
 % constraints
@@ -310,15 +352,21 @@ yref_e = zeros(ny_e, 1); % output reference in mayer term
 
 Jbx = zeros(nbx, model.nx); for ii=1:nbx Jbx(ii,ii)=1.0; end
 lbx = [-176; -176; -110; -110; -110; -40; -40; -40; -40;... % tau
-    deg2rad(-170);deg2rad(-120);deg2rad(-170); ...
-    deg2rad(-120);deg2rad(-170);deg2rad(-120); ...
-    deg2rad(-170);deg2rad(-120);deg2rad(-180); ... % q
-    -ones(9,1); ....
+    Rodyman.qlim(1,1);Rodyman.qlim(2,1);Rodyman.qlim(4,1); ...
+    Rodyman.qlim(5,1);Rodyman.qlim(6,1);Rodyman.qlim(7,1); ...
+    Rodyman.qlim(8,1);Rodyman.qlim(9,1);Rodyman.qlim(10,1); ... % q
+    qdotlim(1,1);qdotlim(2,1);qdotlim(3,1);
+    qdotlim(4,1);qdotlim(5,1);qdotlim(6,1);
+    qdotlim(7,1);qdotlim(8,1);qdotlim(9,1);
+    
+    
+%    -ones(9,1); ....
 %     deg2rad(-98);deg2rad(-98);deg2rad(-100); ...
 %     deg2rad(-98);deg2rad(-140);deg2rad(-180); ...
 %     deg2rad(-180);deg2rad(-140);deg2rad(-180); ... % qdot
     1e-3*ones(16,1)];   % lambda
 ubx = -lbx;
+ubx(13) = Rodyman.qlim(5,2);
 ubx(28:27+16) = 2;
 
 Jbu = zeros(nbu, nu); for ii=1:nbu Jbu(ii,ii)=1.0; end
@@ -544,14 +592,14 @@ for ii=1:n_sim
     %         x_sim(19:27,ii))/dt) + o.Nb)];
     
     %ddq = pinv(M_m)*(x_sim(1:7,ii) - Jb'*Fb_read - C_m - N_m);
-    ddq = M_tilde_inv*(x_sim(1:9,ii+1) - C_tilde - N_tilde);
+    ddq = M_tilde\(x_sim(1:9,ii+1) - C_tilde - N_tilde);
     ddx = Jb*ddq + Jb_dot*x_sim(19:27,ii+1);
     Fb_read = o.Mb*ddx + o.Nb;
     Fc_read = pinv(o.G)*Fb_read;
     La_read1 = pinv(Fc_hat)*Fc_read;
     La_read2 = pinv(o.G*Fc_hat)*Fb_read;
     La_read3 = x_sim(28:43,ii+1);
-    La_read = La_read1;
+    La_read = La_read2;
     
     % store logs
     p_log = [p_log, T_wb(1:3,4)];
@@ -740,7 +788,8 @@ if(PLOTS)
     end
 end
 
-save(strcat(strcat('data_rodyman_',datestr(t),'.mat')), 'p_log', 'phi_log', 'lambda_log', 'dq_log', 'q_log', 'tau_log', 'dtau_log', 'cost_val_ocp', 'q_ref', 'dq_ref', 'p_ref', 'o_ref', 'lbx', 'ubx', 'lbu', 'ubu')
+save(strcat(strcat('data_rodyman_8_45s_real.mat')), 'p_log', 'phi_log', 'lambda_log', 'dq_log', 'q_log', 'tau_log', 'dtau_log', 'cost_val_ocp', 'q_ref', 'dq_ref', 'p_ref', 'o_ref', 'lbx', 'ubx', 'lbu', 'ubu')
+%save(strcat(strcat('data_rodyman_',datestr(t),'.mat')), 'p_log', 'phi_log', 'lambda_log', 'dq_log', 'q_log', 'tau_log', 'dtau_log', 'cost_val_ocp', 'q_ref', 'dq_ref', 'p_ref', 'o_ref', 'lbx', 'ubx', 'lbu', 'ubu')
 if(PLOTS)
     fileID = fopen(strcat(strcat('q_log_f',datestr(t),'.txt')),'w');
     fprintf(fileID,'%12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f\n', q_log_f);

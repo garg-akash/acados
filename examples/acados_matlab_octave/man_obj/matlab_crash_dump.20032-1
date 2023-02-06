@@ -1,0 +1,52 @@
+
+--------------------------------------------------------------------------------
+       Segmentation violation detected at gio feb 02 18:16:59 2023 +0100
+--------------------------------------------------------------------------------
+
+Configuration:
+  Crash Decoding           : Disabled - No sandbox or build area path
+  Crash Mode               : continue (default)
+  Default Encoding         : UTF-8
+  Deployed                 : false
+  Desktop Environment      : XFCE
+  GNU C Library            : 2.31 stable
+  Graphics Driver          : NVIDIA Corporation NVIDIA GeForce GTX 1650/PCIe/SSE2 Version 4.6.0 NVIDIA 470.161.03
+  Graphics card 1          : 0x10de ( 0x10de ) 0x1f91 Version 470.161.3.0 (0-0-0)
+  Graphics card 2          : 0x8086 ( 0x8086 ) 0x3e9b Version 0.0.0.0 (0-0-0)
+  Java Version             : Java 1.8.0_202-b08 with Oracle Corporation Java HotSpot(TM) 64-Bit Server VM mixed mode
+  MATLAB Architecture      : glnxa64
+  MATLAB Entitlement ID    : 3400609
+  MATLAB Root              : /usr/local/MATLAB/R2020a
+  MATLAB Version           : 9.8.0.1721703 (R2020a) Update 7
+  OpenGL                   : hardware
+  Operating System         : Ubuntu 20.04.5 LTS
+  Process ID               : 20032
+  Processor ID             : x86 Family 6 Model 158 Stepping 10, GenuineIntel
+  Session Key              : 63b2bc04-1099-474e-b423-f53c2d46d7d6
+  Static TLS mitigation    : Enabled: Full
+  Window System            : The X.Org Foundation (12013000), display :0.0
+
+Fault Count: 1
+
+
+Abnormal termination:
+Segmentation violation
+
+Register State (from fault):
+  RAX = 0000000000000000  RBX = 0000000000000000
+  RCX = 00007f6cbb08923f  RDX = 0000000000000000
+  RSP = 00007f6ab0514c60  RBP = 00007f6b23c663a0
+  RSI = 0000000000000000  RDI = 0000000000000000
+
+   R8 = 0000000000000000   R9 = 0000000000000000
+  R10 = 0000000000000000  R11 = 0000000000000000
+  R12 = 0000000000000000  R13 = 00007f6b23c66fa0
+  R14 = 0000000000000000  R15 = 0000000000000000
+
+  RIP = 00007f6b23c5384a  EFL = 0000000000010202
+
+   CS = 0033   FS = 0000   GS = 0000
+
+Stack Trace (from fault):
+[  0] 0x00007f6b23c5384a                                   <unknown-module>+00000000
+
