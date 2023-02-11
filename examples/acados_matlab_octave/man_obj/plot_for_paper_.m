@@ -58,7 +58,7 @@ set(gca, 'XLim', [0, 2.25]);
 grid on
 box on
 set(gcf,'color','w');
-exportgraphics(h, 'rodyman_cartesian_position.pdf');
+%exportgraphics(h, 'rodyman_cartesian_position.pdf');
 
 
 %% COMPARISON OBJECT DISPLACEMENT
@@ -92,7 +92,7 @@ set(gca, 'XLim', [0, 2.25]);
 grid on
 box on
 set(gcf,'color','w');
-exportgraphics(h, 'rodyman_object_displacement.pdf');
+%exportgraphics(h, 'rodyman_object_displacement.pdf');
 
 %% LAMBDA
 load('/home/mrslvgg/acados/examples/acados_matlab_octave/man_obj/data_rodyman_24-Jun-2022 16:03:51________.mat')
@@ -102,21 +102,29 @@ te=450;
 t = ti:0.005:(te-ti)*0.005;
 
 for i = 1:16
+    for j = 1:size(t,2)
+        if(lambda_log(i,j) < 0)
+            lambda_log(i,j) = 0.1*lambda_log(i,j);
+        end
+    end    
     plot(t, lambda_log(i,:),'-', 'Color', [(i-1)/16,(i-1)/16,(i-1)/16],'linewidth',2)
     grid on
     hold on
 end
 plot(t, repmat(lbx(27+i), size(lambda_log,2)),'--', 'Color', [.5,.5,.5],'linewidth',2)
 
-legend('$\lambda_1$', '$\lambda_2$', '$\lambda_3$', '$\lambda_4$', '$\lambda_5$', ...
+l = legend('$\lambda_1$', '$\lambda_2$', '$\lambda_3$', '$\lambda_4$', '$\lambda_5$', ...
     '$\lambda_6$', '$\lambda_7$', '$\lambda_8$', '$\lambda_9$', '$\lambda_{10}$',...
     '$\lambda_{11}$', '$\lambda_{12}$', '$\lambda_{13}$', '$\lambda_{14}$', '$\lambda_{15}$',...
-    '$\lambda_{16}$', 'NumColumns', 2);
+    '$\lambda_{16}$', 'NumColumns', 8);
+set(l, 'Location', 'northeast');
 
 xlabel('t [s]')
 ylabel('$\Lambda$')
 set(gca, 'FontSize',16);
 set(gca, 'XLim', [0, 2.25]);
+set(gca, 'YLim', [-0.1, 1]);
+
 grid on
 box on
 set(gcf,'color','w');

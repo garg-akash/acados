@@ -13,7 +13,7 @@ oee0 = eul; %initial euler zyx of ee wrt world
 %% TRAJECTORY
 dt = 0.008;
                                                            
-traj = mstraj([pee0';pee1';pee2';pee3';pee4'], [], [1.8,0.9,1.8,0.9], [], dt, 0.2, zeros(1,3), zeros(1,3));
+traj = mstraj([pee0';pee1';pee2';pee3';pee4'], [], [1.7,0.85,1.7,0.85], [], dt, 0.2, zeros(1,3), zeros(1,3));
 
 T = size(traj,1)*dt;
 

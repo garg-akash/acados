@@ -187,8 +187,8 @@ Ad_eb = [[R_eb,zeros(3)];[skew(T_eb(1:3,4))*R_eb,R_eb]];
 if(GENERATE_TRAJECTORY)
     disp('Planning the trajectory...')
     
-    eight_shaped_traj;
-    %square_via_points_traj;
+    %eight_shaped_traj;
+    square_via_points_traj;
     %linear_traj;
     
     %%%%%%%%%%%%%%%%
@@ -249,10 +249,10 @@ if(GENERATE_TRAJECTORY)
     fprintf(fileID,'%12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f\n', q_ref);
     fclose(fileID);
     
-    save('cart_jnt_8_45s_real.mat', 'q_ref', 'dq_ref', 'p_ref', 'o_ref', 'pd_ref', 'w_ref');
+    save('cart_jnt_square_51s_real.mat', 'q_ref', 'dq_ref', 'p_ref', 'o_ref', 'pd_ref', 'w_ref');
     
 else
-    load('cart_jnt_8_45s_real.mat')
+    load('cart_jnt_square_51s_real.mat')
     T = size(q_ref,2)*dt;
 end
 
@@ -788,7 +788,7 @@ if(PLOTS)
     end
 end
 
-save(strcat(strcat('data_rodyman_8_45s_real.mat')), 'p_log', 'phi_log', 'lambda_log', 'dq_log', 'q_log', 'tau_log', 'dtau_log', 'cost_val_ocp', 'q_ref', 'dq_ref', 'p_ref', 'o_ref', 'lbx', 'ubx', 'lbu', 'ubu')
+save(strcat(strcat('data_rodyman_square_51s_real.mat')), 'p_log', 'phi_log', 'lambda_log', 'dq_log', 'q_log', 'tau_log', 'dtau_log', 'cost_val_ocp', 'q_ref', 'dq_ref', 'p_ref', 'o_ref', 'lbx', 'ubx', 'lbu', 'ubu')
 %save(strcat(strcat('data_rodyman_',datestr(t),'.mat')), 'p_log', 'phi_log', 'lambda_log', 'dq_log', 'q_log', 'tau_log', 'dtau_log', 'cost_val_ocp', 'q_ref', 'dq_ref', 'p_ref', 'o_ref', 'lbx', 'ubx', 'lbu', 'ubu')
 if(PLOTS)
     fileID = fopen(strcat(strcat('q_log_f',datestr(t),'.txt')),'w');
